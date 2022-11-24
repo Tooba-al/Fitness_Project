@@ -28,6 +28,7 @@ urlpatterns = [
     path('verify-email/', UserProfileAuthTokenView.as_view()),
     path('profile/data/', RetrieveUserProfileDataView.as_view()),
     path('profile/edit/', RetrieveUserProfileEditView.as_view()),
+    path('profile/add-to-wallet/', AddToWalletView.as_view()),
     path('login/', LoginView.as_view()),
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
