@@ -35,13 +35,13 @@ class UserProfileDataEditSerializer(serializers.ModelSerializer):
 
 class MemberSignUpSerializer(serializers.ModelSerializer):
     record = serializers.BooleanField(default = False)
-    height = serializers.IntegerField()
-    weight = serializers.IntegerField()
-    arm = serializers.IntegerField(allow_null=True)
-    chest = serializers.IntegerField(allow_null=True)
-    waist = serializers.IntegerField(allow_null=True)
-    hip = serializers.IntegerField(allow_null=True)
-    thigh = serializers.IntegerField(allow_null=True)
+    # height = serializers.IntegerField()
+    # weight = serializers.IntegerField()
+    # arm = serializers.IntegerField(allow_null=True)
+    # chest = serializers.IntegerField(allow_null=True)
+    # waist = serializers.IntegerField(allow_null=True)
+    # hip = serializers.IntegerField(allow_null=True)
+    # thigh = serializers.IntegerField(allow_null=True)
     wallet = serializers.IntegerField(default=0)
 
     class Meta:
@@ -77,7 +77,8 @@ class ResendVerificationCodeSerializer(serializers.Serializer):
 class ForgetPasswordSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
      
-     
+ 
+    
 class ClubSerializer(serializers.Serializer):
     class Meta:
         model = Club
@@ -100,3 +101,14 @@ class ClubListSerializer(serializers.ModelSerializer):
         _owner_data['last_name'] = _user_profile.last_name
         
         
+class AddToWalletSerializer(serializers.ModelSerializer):
+    wallet_data = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Member
+        fields = ['id', 'wallet_data']
+        
+    def get_wallet_data(self, instance):
+        _user_profile = instance.user_profile
+        _owner_data = {}
+        _owner_data['wallet'] = _user_profile.wallet
