@@ -234,3 +234,101 @@ class LoginView(generics.GenericAPIView):
                 return Response({'detail': _('Wrong password'),}, status=status.HTTP_404_NOT_FOUND)
         except:
             return Response({'detail': _('You may not be verified yet.'),}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ForgetPasswordView(generics.CreateAPIView):
+
+    serializer_class = ForgetPasswordSerializer
+
+    def post(self, request, *args, **kwargs):
+        s = self.serializer_class(data=request.data)
+        s.is_valid(raise_exception=True)
+
+        try:
+            with transaction.atomic():
+                valid = s.validated_data
+                user_profile = UserProfile.objects.get(email = valid.get('email'))
+                fpl = ForgetPasswordLink.objects.create(user_profile=user_profile)
+
+                if fpl['status'] != 201:
+                    return Response({'detail': _("Code not sent"), 'wait': fpl['wait']}, status=fpl['status'])
+
+                if settings.DEBUG:
+                    return Response({'detail': _("Code sent"), 'link': fpl['link']})
+
+                return Response({'detail': _("Code sent")})
+
+        except UserProfile.DoesNotExist:
+            return Response({'detail': _("No user profiles with this email.")}, status=status.HTTP_400_BAD_REQUEST)
+
+class ChangePasswordView(generics.UpdateAPIView):
+
+    serializer_class = ChangePasswordSerializer
+
+    def put(self, request, *args, **kwargs):
+        s = self.serializer_class(data=request.data)
+        s.is_valid(raise_exception=True)
+
+        try:
+            with transaction.atomic():
+                valid = s.validated_data
+                change_link = self.kwargs['change_link']
+
+                fpl = ForgetPasswordLink.objects.get(link = change_link)
+                time = datetime.datetime.now(datetime.timezone.utc) - fpl.created_at
+
+                if fpl.used == True:
+                    return Response({'detail': _("You have already used this link.")}, status=status.HTTP_400_BAD_REQUEST)
+                elif time > datetime.timedelta(hours = 1):
+                    return Response({'detail': _("This link has surpassed its valid time.")}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    fpl.used = True
+                    new_password = make_password(valid.get("password"))
+                    user_profile = fpl.user_profile
+                    user_profile.password = new_password
+                    user_profile.save()
+                    fpl.save()
+                    return Response({'detail': _("Your password changed successfully")}, status=status.HTTP_200_OK)
+
+
+        except ForgetPasswordLink.DoesNotExist:
+            return Response({'detail': _("This link isn't valid.")}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResendVerificationCodeView(generics.CreateAPIView):
+
+    serializer_class = ResendVerificationCodeSerializer
+
+    def post(self, request, *args, **kwargs):
+        s = self.serializer_class(data=request.data)
+        s.is_valid(raise_exception=True)
+
+        try:
+            with transaction.atomic():
+                valid = s.validated_data
+                user_profile = UserProfile.objects.get(email = valid.get('email'))
+
+                upv = UserProfileEmailVerification.objects.create(user_profile=user_profile)
+
+                if upv['status'] != 201:
+                    return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
+
+                if settings.DEBUG:
+                    return Response({'detail': _("Code sent"), 'code': upv['code']})
+
+                return Response({'detail': _("Code sent")})
+
+        except UserProfile.DoesNotExist:
+            return Response({'detail': _("This user doesn't exist.")}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class ShowClubListView(generics.ListAPIView):
+    queryset = Club.objects.all()
+    serializer_class = ClubSerializer
+    # permission_classes = [IsAuthenticated,]
+    # filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['name']
+
+class AddToWalletView(generics.RetrieveAPIView):
+    pass

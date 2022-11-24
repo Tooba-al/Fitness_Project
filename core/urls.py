@@ -21,9 +21,10 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('club-owner/sign-up/', OwnerSignUpView.as_view()),
     path('member/sign-up/', OwnerSignUpView.as_view()),
-    # path('forget-password/', ForgetPasswordView.as_view()),
-    # path('change-password/<str:change_link>/', ChangePasswordView.as_view()),
-    # path('resend-code/', ResendVerificationCodeView.as_view()),
+    path('forget-password/', ForgetPasswordView.as_view()),
+    path('change-password/<str:change_link>/', ChangePasswordView.as_view()),
+    path('resend-code/', ResendVerificationCodeView.as_view()),
+    path('verify-email/', UserProfileAuthTokenView.as_view()),
     path('verify-email/', UserProfileAuthTokenView.as_view()),
     path('profile/data/', RetrieveUserProfileDataView.as_view()),
     path('profile/edit/', RetrieveUserProfileEditView.as_view()),

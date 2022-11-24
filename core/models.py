@@ -23,8 +23,6 @@ class UserProfile(models.Model):
     )
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="user_profile")
-    #wallet = models.OneToOneField('Wallet', on_delete=models.CASCADE, related_name='user_profile', blank=True,
-    #                              null=True)
     username = models.CharField(max_length=32, blank=False, null=True, unique=True)
     password = models.CharField(max_length=100, blank=False, null=True)
     first_name = models.CharField(max_length=100, blank=True, null=True)
@@ -101,29 +99,117 @@ def send_verification_email(sender, instance, created, **kwargs):
     if created:
         # send_verification_code(instance.user_profile.email, instance.code)
         send_code_email(instance.user_profile.first_name, instance.user_profile.email, instance.code)
+       
+class ForgetPasswordLinkObjectManager(models.Manager):
+    def create(self, **kwargs):
+        created = False
+
+        with transaction.atomic():
+            user_profile = kwargs.get('user_profile')
+
+            # lock the user profile to prevent concurrent creations
+            user_profile = UserProfile.objects.select_for_update().get(pk=user_profile.pk)
+
+            time = timezone.now() - timezone.timedelta(minutes=ForgetPasswordLink.RETRY_TIME)
+
+            # select the latest valid user profile phone verification object
+            user_profile_email = ForgetPasswordLink.objects.order_by('-created_at'). \
+                filter(created_at__gte=time,
+                       user_profile__email=user_profile.email) \
+                .last()
+
+            # create a new object if none exists
+            if not user_profile_email:
+                obj = ForgetPasswordLink(**kwargs)
+                obj.save()
+                created = True
+
+        if created:
+            if settings.DEBUG:
+                return {'status': 201, 'obj': obj, 'link': obj.link}
+            return {'status': 201, 'obj': obj}
+
+        return {'status': 403,
+                'wait': timezone.timedelta(minutes=UserProfileEmailVerification.RETRY_TIME) +
+                        (user_profile_email.created_at - timezone.now())}
+
+
+
+class ForgetPasswordLink(models.Model):
+    RETRY_TIME = 2
+
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="forget_password_link")
+    link = models.CharField(max_length = 16, default=generate_16char_link)
+    used = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = ForgetPasswordLinkObjectManager()
+
+@receiver(post_save, sender=ForgetPasswordLink)
+def send_verification_email(sender, instance, created, **kwargs):
+    """
+        send the change password if a new object is created
+    """
+    if created:
+        #send_verification_code(instance.user_profile.email, instance.code)
+        #link_text = "/api/v1/change_password/" + instance.link + "/"
+        #link = request.build_absolute_uri(link_text)
+        #link = str(request.get_host) + link_text
+        #link = request.build_absolute_uri(reverse('view_name', args=(instance.link, )))
+        send_change_password_email(instance.user_profile.first_name, instance.user_profile.email, instance.link)
+
+        
+        
+        
         
 # model Member
 class Member(models.Model):    
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name="member")
-    height = models.IntegerField(max_length =255)
-    weight = models.IntegerField(max_length =255)
-    arm = models.IntegerField(max_length =255, null=True, blank=True)
-    chest = models.IntegerField(max_length =255, null=True, blank=True)
-    waist = models.IntegerField(max_length =255, null=True, blank=True)
-    hip = models.IntegerField(max_length =255, null=True, blank=True)
-    thigh = models.IntegerField(max_length =255, null=True, blank=True)
+    # height = models.IntegerField(max_length =255)
+    # weight = models.IntegerField(max_length =255)
+    # arm = models.IntegerField(max_length =255, null=True, blank=True)
+    # chest = models.IntegerField(max_length =255, null=True, blank=True)
+    # waist = models.IntegerField(max_length =255, null=True, blank=True)
+    # hip = models.IntegerField(max_length =255, null=True, blank=True)
+    # thigh = models.IntegerField(max_length =255, null=True, blank=True)
+    wallet = models.BigIntegerField(default=0)
     # record = models.BooleanField(default = False)
-    # group = models.IntegerField(default = 1)
+    group = models.IntegerField(default = 1)
         
 # model Club
-class Club(models.Model):
-    # programs = models.OneToOneField(Program, on_delete=models.CASCADE, related_name="program")
-    name = models.CharField(max_length=32)
-    
+class Trainer(models.Model):
+    user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name="trainer")
+
 class Owner(models.Model):
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name="owner")
-    club = models.OneToOneField(Club, on_delete=models.CASCADE, related_name="club")
+    # club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="club")
 
+class Club(models.Model):
+    owner = models.OneToOneField(Owner, on_delete=models.CASCADE, related_name="club")
+    # programs = models.OneToOneField(Program, on_delete=models.CASCADE, related_name="program")
+    # trainers = models.ManyToManyField(Trainer, related_name="trainers", blank=True)
+    name = models.CharField(max_length=32)
+
+class Event(models.Model):
+    owner = models.OneToOneField(Owner, on_delete=models.CASCADE, related_name="event")
+    title = models.CharField(max_length=50)
+    description = models.TextField(max_length=300)
+    date = models.DateField(null = True, blank = True)
+    capacity = models.IntegerField(default=0)
+    
+# Trainer-Club Relation
+class TCR(models.Model):
+    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="trainers_rels")
+    club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="club_rels")
     
 
-     
+# Member-Club Relation
+class MCR(models.Model):
+    pass
+    
+# Event-Members Relation
+class EMR(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="event")
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="member")
+    isRegistered = models.BooleanField(default=False)
+    
