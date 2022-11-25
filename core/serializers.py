@@ -7,7 +7,7 @@ class UserProfileDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ['username','email','first_name', 'last_name', ]
+        fields = ['username','email','first_name', 'last_name', 'situation']
         #read_only_fields = ['wallet']
 
     def get_situation(self, instance):
@@ -54,7 +54,7 @@ class OwnerSignUpSerializer(serializers.ModelSerializer):
     club_name = serializers.IntegerField(allow_null=True)
     class Meta:
         model = UserProfile
-        fields = ['username','password','phone_number','first_name', 'last_name', 'email', 'sex', 'club_name']
+        fields = ['username','password', 'first_name', 'last_name', 'email', 'sex', 'club_name']
         #read_only_fields = ['wallet']
 
 class UserProfileEmailVerificationSerializer(serializers.Serializer):

@@ -50,13 +50,13 @@ class UserProfileVerificationObjectManager(models.Manager):
             time = timezone.now() - timezone.timedelta(minutes=UserProfileEmailVerification.RETRY_TIME)
 
             # select the latest valid user profile phone verification object
-            user_profile_phone = UserProfileEmailVerification.objects.order_by('-created_at'). \
+            user_profile_email = UserProfileEmailVerification.objects.order_by('-created_at'). \
                 filter(created_at__gte=time,
                        user_profile__email=user_profile.email) \
                 .last()
 
             # create a new object if none exists
-            if not user_profile_phone:
+            if not user_profile_email:
                 obj = UserProfileEmailVerification(**kwargs)
                 obj.save()
                 created = True
@@ -68,7 +68,7 @@ class UserProfileVerificationObjectManager(models.Manager):
 
         return {'status': 403,
                 'wait': timezone.timedelta(minutes=UserProfileEmailVerification.RETRY_TIME) +
-                        (user_profile_phone.created_at - timezone.now())}
+                        (user_profile_email.created_at - timezone.now())}
 
 
 class UserProfileEmailVerification(models.Model):
