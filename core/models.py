@@ -165,8 +165,8 @@ def send_verification_email(sender, instance, created, **kwargs):
 # model Member
 class Member(models.Model):    
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name="member")
-    # height = models.IntegerField(max_length =255)
-    # weight = models.IntegerField(max_length =255)
+    height = models.IntegerField(default=165)
+    weight = models.IntegerField(default=60)
     # arm = models.IntegerField(max_length =255, null=True, blank=True)
     # chest = models.IntegerField(max_length =255, null=True, blank=True)
     # waist = models.IntegerField(max_length =255, null=True, blank=True)
@@ -174,7 +174,7 @@ class Member(models.Model):
     # thigh = models.IntegerField(max_length =255, null=True, blank=True)
     wallet = models.BigIntegerField(default=0)
     # record = models.BooleanField(default = False)
-    group = models.IntegerField(default = 1)
+    # group = models.IntegerField(default = 1)
         
 # model Club
 class Trainer(models.Model):
@@ -191,11 +191,25 @@ class Club(models.Model):
     name = models.CharField(max_length=32)
 
 class Event(models.Model):
-    owner = models.OneToOneField(Owner, on_delete=models.CASCADE, related_name="event")
+    owner = models.ForeignKey(Owner, on_delete=models.CASCADE, related_name="send_event_owner")
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="receiver_event_owner")
     title = models.CharField(max_length=50)
     description = models.TextField(max_length=300)
     date = models.DateField(null = True, blank = True)
     capacity = models.IntegerField(default=0)
+    attachment = models.ImageField(upload_to=None, height_field=None, width_field=None, max_length=100, null = True, blank = True)
+ 
+class TargetCategory(models.Model):
+    name = models.CharField(max_length=110)
+    def __str__(self):
+        return self.name
+   
+class Target(models.Model):
+    member = models.ForeignKey(Owner, on_delete=models.CASCADE, related_name="target")
+    category = models.OneToOneField(TargetCategory, on_delete=models.CASCADE, related_name="target",blank=True)
+    num_days = models.IntegerField(default=0, blank=True, null=True)
+    target_height = models.IntegerField(default=165, blank=True, null=True)
+    target_weight = models.IntegerField(default=60, blank=True, null=True)
     
 # Trainer-Club Relation
 class TCR(models.Model):

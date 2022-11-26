@@ -321,7 +321,30 @@ class ResendVerificationCodeView(generics.CreateAPIView):
         except UserProfile.DoesNotExist:
             return Response({'detail': _("This user doesn't exist.")}, status=status.HTTP_400_BAD_REQUEST)
 
+##################################
+##################################
+##################################
 
+class ShowMemberListView(generics.ListAPIView):
+    queryset = Member.objects.all()
+    serializer_class = MemberSerializer
+    # permission_classes = [IsAuthenticated,]
+    # filter_backends = [filters.OrderingFilter]
+    # ordering_fields = ['id']
+
+class ShowOwnerListView(generics.ListAPIView):
+    queryset = Owner.objects.all()
+    serializer_class = OwnerSerializer
+    # permission_classes = [IsAuthenticated,]
+    # filter_backends = [filters.OrderingFilter]
+    # ordering_fields = ['name']
+
+class ShowTrainerListView(generics.ListAPIView):
+    queryset = Trainer.objects.all()
+    serializer_class = TrainerSerializer
+    # permission_classes = [IsAuthenticated,]
+    # filter_backends = [filters.OrderingFilter]
+    # ordering_fields = ['name']
 
 class ShowClubListView(generics.ListAPIView):
     queryset = Club.objects.all()
@@ -329,6 +352,108 @@ class ShowClubListView(generics.ListAPIView):
     # permission_classes = [IsAuthenticated,]
     # filter_backends = [filters.OrderingFilter]
     ordering_fields = ['name']
+    
+class AddEventView(generics.CreateAPIView):
+    serializer_class = CreateEventSerializer
+    queryset = Event.objects.all()
+    # permission_classes = [IsOwner,]
+
+    def perform_create(self, serializer):
+        with transaction.atomic():
+            event = serializer.save(care_giver=self.request.user.user_profile.owner)
+            event.save()
+
+
+class SendEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = ['title', 'description', 'date', 'capacity', 'attachment']
+
+class RecievedEventsSerializer(serializers.ModelSerializer):
+    member_data = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Event
+        fields = ['id', 'title', 'description', 'date', 'capacity', 'attachment']
+
+    def get_member_data(self, instance):
+        _member = instance.member
+        _user_profile = _member.user_profile
+        _profile_data = {}
+        _profile_data['username'] = _user_profile.username
+        _profile_data['first_name'] = _user_profile.first_name
+        _profile_data['last_name'] = _user_profile.last_name
+        return _profile_data
+
+class SentEventsSerializer(serializers.ModelSerializer):
+    owner_username = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Event
+        fields = ['id', 'owner', 'owner_username', 'title']
+
+    def get_owner_username(self, instance):
+        _owner = instance.owner
+        _username = _owner.user_profile.username
+        return _username
+
+class RejisterEventView(generics.GenericAPIView):
+    serializer_class = EMRSerializer
+    # permission_classes = [IsMember,]
+
+    def put(self, request, *args, **kwargs):
+        user_request_data = self.serializer_class(data=request.data)
+        user_request_data.is_valid(raise_exception=True)
+    
+        try:
+            with transaction.atomic():
+                member = self.request.user.user_profile.member
+                event_id = self.kwargs['request_id']
+                event = Event.objects.get(id = event_id)
+                emr = EMR.objects.get(event = event, member = member)
+                emr.isRegistered = True
+                emr.save()
+                    
+                return Response({'detail': _("You registered to this event.")}, status=status.HTTP_200_OK)
+        except:
+            return Response({'detail': _("There was a problem with registering to this event.")}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UnrejisterEventRequestView(generics.GenericAPIView):
+    serializer_class = EMRSerializer
+    # permission_classes = [IsMember,]
+
+    def put(self, request, *args, **kwargs):
+        user_request_data = self.serializer_class(data=request.data)
+        user_request_data.is_valid(raise_exception=True)
+        
+        try:
+            with transaction.atomic():
+                member = self.request.user.user_profile.member
+                event_id = self.kwargs['request_id']
+                event = Event.objects.get(id = event_id)
+                emr = EMR.objects.get(event = event, member = member)
+                emr.isRegistered = False
+                emr.save()
+                    
+                return Response({'detail': _("You registered to this event.")}, status=status.HTTP_200_OK)
+        except:
+            return Response({'detail': _("There was a problem with registering to this event.")}, status=status.HTTP_400_BAD_REQUEST)
+
+    
+class EventView(generics.RetrieveAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'event_id'
+    # permission_classes = [IsAuthenticated,]
+
+class ShowEventListView(generics.ListAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+    # permission_classes = [IsAuthenticated,]
+    # filter_backends = [filters.OrderingFilter]
+    # ordering_fields = ['name']
 
 class AddToWalletView(generics.RetrieveAPIView):
     queryset = Member.objects.all()
@@ -338,7 +463,6 @@ class AddToWalletView(generics.RetrieveAPIView):
         user_request_data = self.serializer_class(data=request.data)
         user_request_data.is_valid(raise_exception=True)
         
-    
         try:
             with transaction.atomic():
                 valid = user_request_data.validated_data
@@ -351,3 +475,5 @@ class AddToWalletView(generics.RetrieveAPIView):
                 return Response({'detail': _("Your wallet successfuly updated.")}, status=status.HTTP_200_OK)
         except:
             return Response({'detail': _("There was a problem with updating your wallet.")}, status=status.HTTP_400_BAD_REQUEST)
+
+
