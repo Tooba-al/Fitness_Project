@@ -58,9 +58,6 @@ class OwnerSignUpSerializer(serializers.ModelSerializer):
         #read_only_fields = ['wallet']
 
 class UserProfileEmailVerificationSerializer(serializers.Serializer):
-    """
-        Used for verifying emails
-    """
     code = serializers.CharField(max_length=10)
     email = serializers.CharField(max_length=15)
 
