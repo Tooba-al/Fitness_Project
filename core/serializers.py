@@ -57,24 +57,24 @@ class OwnerSignUpSerializer(serializers.ModelSerializer):
         fields = ['username','password', 'first_name', 'last_name', 'email', 'sex', 'club_name']
         #read_only_fields = ['wallet']
 
-class UserProfileEmailVerificationSerializer(serializers.ModelSerializer):
+class UserProfileEmailVerificationSerializer(serializers.Serializer):
     """
         Used for verifying emails
     """
     code = serializers.CharField(max_length=10)
     email = serializers.CharField(max_length=15)
 
-class LoginSerializer(serializers.ModelSerializer):
+class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=32)
     password = serializers.CharField(max_length=32)
     
-class ChangePasswordSerializer(serializers.ModelSerializer):
+class ChangePasswordSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=100)
 
-class ResendVerificationCodeSerializer(serializers.ModelSerializer):
+class ResendVerificationCodeSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
     
-class ForgetPasswordSerializer(serializers.ModelSerializer):
+class ForgetPasswordSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
    
    
