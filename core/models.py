@@ -189,6 +189,8 @@ class Club(models.Model):
     # programs = models.OneToOneField(Program, on_delete=models.CASCADE, related_name="program")
     # trainers = models.ManyToManyField(Trainer, related_name="trainers", blank=True)
     name = models.CharField(max_length=32)
+    address = models.TextField(max_length=500)
+    phone_number = models.CharField(max_length=12)
 
 class Event(models.Model):
     owner = models.ForeignKey(Owner, on_delete=models.CASCADE, related_name="send_event_owner")

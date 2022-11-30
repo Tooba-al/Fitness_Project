@@ -150,8 +150,20 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 SERVER_EMAIL = 'emailservice.umind@gmail.com'
 DEFAULT_FROM_EMAIL = 'emailservice.umind@gmail.com'
 
-DEFAULT_AUTO_FIELD = '*'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATE_CONTEXT_PROCESSORS = [
                                 'django.core.context_processors.request',]
+
+# CORS_ALLOWED_ORIGINS = [
+#     "http://127.0.0.1:8000/",
+# ]
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
