@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     'rest_framework.authtoken',
     'drf_yasg',
     'rest_framework_swagger',
@@ -149,7 +150,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 SERVER_EMAIL = 'emailservice.umind@gmail.com'
 DEFAULT_FROM_EMAIL = 'emailservice.umind@gmail.com'
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = '*'
 CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATE_CONTEXT_PROCESSORS = [
