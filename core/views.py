@@ -47,16 +47,16 @@ class UserSignUpView(generics.GenericAPIView):
                                                             last_name = valid.get('last_name'),                                                
                                                             user=User.objects.create(
                                                                     username=s.validated_data.get('username')))
-                    user = UserProfile.objects.create(
-                        user_profile = user_profile,
-                    )
+                    # user = UserProfile.objects.create(
+                    #     user_profile = user_profile,
+                    # )
                     #wallet = Wallet.objects.create(owner = user_profile)
                     #user_profile.wallet = wallet
                     user_profile.save()
-                    user.save()
+                    # user.save()
 
                     upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
-
+                    print(upv['status'])
                     if upv['status'] != 201:
                         return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
 
