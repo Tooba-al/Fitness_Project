@@ -31,6 +31,11 @@ class UserProfileDataEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields =  ['first_name', 'last_name', 'email']
+        
+class UserDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields =  ['username', 'password', 'first_name', 'last_name', 'email']
 
 
 class UserSignUpSerializer(serializers.ModelSerializer):
@@ -50,6 +55,15 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         fields = ['username','password', 'first_name', 'last_name', 'email']
                 #   'height', 'weight', 'arm', 'chest', 'waist', 'hip', 'thigh', 'wallet']
         #read_only_fields = ['wallet']
+        extra_kwargs = {'password': {'write_only': True}}
+    def create(self, validated_data):
+        user = UserProfile.objects.create(validated_data['username'], 
+                                            validated_data['email'], 
+                                            validated_data['password'],
+                                            validated_data['first_name'], 
+                                            validated_data['last_name'], )
+
+        return user
 
 class OwnerSignUpSerializer(serializers.ModelSerializer):
     club_name = serializers.CharField(allow_null=True)

@@ -11,13 +11,27 @@ import os
 import datetime
 
 
-class UserSignUpView(generics.ListCreateAPIView):
+class UserSignUpView(generics.GenericAPIView):
     """
         Send verification code
         if send failed respond with wait time
     """
 
     serializer_class = UserSignUpSerializer
+    # def post(self, request, *args, **kwargs):
+    #     s = self.get_serializer(data=request.data)
+    #     s.is_valid(raise_exception=True)
+    #     user = UserProfile.objects.create(s.validated_data['username'], 
+    #                                     s.validated_data['email'], 
+    #                                     s.validated_data['password'], 
+    #                                     s.validated_data['first_name'],
+    #                                     s.validated_data['last_name'],)
+    #     user = s.save()
+    #     return Response({
+    #     "user": UserSignUpSerializer(user
+    #                                 , context=self.get_serializer_context()).data,
+    #     # "token": AuthToken.objects.create(user)[1]
+    #     })
 
     def get_object(self):
         email = self.request.data.get('email')
@@ -35,109 +49,33 @@ class UserSignUpView(generics.ListCreateAPIView):
         user_profile = self.get_object()
 
         if not user_profile:
-            try:
-                with transaction.atomic():
-                    valid = s.validated_data
-                    hash = make_password(valid.get("password"))
-                    user_profile = UserProfile.objects.create(username = valid.get('username'),
-                                                            password = hash,
-                                                            email = valid.get('email'),
-                                                            first_name = valid.get('first_name'),
-                                                            last_name = valid.get('last_name'),                                                
-                                                            user=User.objects.create(
-                                                                username=s.validated_data.get('username')))
-                    # user = UserProfile.objects.create(
-                    #     user_profile = user_profile,
-                    # )
-                    #wallet = Wallet.objects.create(owner = user_profile)
-                    #user_profile.wallet = wallet
-                    user_profile.save()
-                    # user.save()
+            # try:
+            with transaction.atomic():
+                valid = s.validated_data
+                hash = make_password(valid.get("password"))
+                user_profile = UserProfile.objects.create(username = valid.get('username'),
+                                                        password = hash,
+                                                        email = valid.get('email'),
+                                                        first_name = valid.get('first_name'),
+                                                        last_name = valid.get('last_name'),                                                
+                                                        user=User.objects.create(
+                                                            username=s.validated_data.get('username')))
+                user_profile.save()
 
-                    upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
-                    if upv['status'] != 201:
-                        return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
+                upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
+                if upv['status'] != 201:
+                    return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
 
-                    if settings.DEBUG:
-                        return Response({'detail': _("Code sent"), 'code': upv['code']})
+                if settings.DEBUG:
+                    return Response({'detail': _("Code sent"), 'code': upv['code']})
 
-                    return Response({'detail': _("Code sent")})
+                return Response({'detail': _("wellcome :)")})
 
-            except:
-                return Response({'detail': _("Problem with signing up")}, status=status.HTTP_400_BAD_REQUEST)
+            # except:
+                # return Response({'detail': _("Problem with signing up")}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'detail': _("This profile already exists.")}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-# class UserSignUpView(generics.GenericAPIView):
-#     """
-#         Send verification code
-#         if send failed respond with wait time
-#     """
-
-#     serializer_class = UserSignUpSerializer
-
-#     def get_object(self):
-
-#         email = self.request.data.get('email')
-#         username = self.request.data.get('username')
-
-#         try:
-#             return UserProfile.objects.get_if_available(username, email)
-#         except UserProfile.DoesNotExist:
-#             return None
-
-#     def post(self, request, *args, **kwargs):
-#         s = self.serializer_class(data=request.data)
-#         s.is_valid(raise_exception=True)
-
-#         user_profile = self.get_object()
-
-#         if not user_profile:
-#             try:
-#                 with transaction.atomic():
-#                     valid = s.validated_data
-#                     hash = make_password(valid.get("password"))
-#                     user_profile = UserProfile.objects.create(username = valid.get('username'),
-#                                                             password = hash,
-#                                                             # sex = valid.get('sex'),
-#                                                             email = valid.get('email'),
-#                                                             first_name = valid.get('first_name'),
-#                                                             last_name = valid.get('last_name'),                                                 
-#                                                             # weight = valid.get('weight'),                                                 
-#                                                             # height = valid.get('height'),                                                 
-#                                                             # arm = valid.get('arm'),                                                 
-#                                                             # chest = valid.get('chest'),                                                 
-#                                                             # waist = valid.get('waist'),                                                 
-#                                                             # hip = valid.get('hip'),                                                 
-#                                                             # thigh = valid.get('thigh'),                                                 
-#                                                             user=User.objects.create(
-#                                                             username=s.validated_data.get('username')))
-#                     user = UserProfile.objects.create(
-#                         user_profile=user_profile,
-#                     )
-
-#                     #wallet = Wallet.objects.create(owner = user_profile)
-#                     #user_profile.wallet = wallet
-#                     user_profile.save()
-#                     user.save()
-
-#                     upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
-
-#                     if upv['status'] != 201:
-#                         return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
-
-#                     if settings.DEBUG:
-#                         return Response({'detail': _("Code sent"), 'code': upv['code']})
-
-#                     return Response({'detail': _("Code sent")})
-
-#             except:
-#                 return Response({'detail': _("Problem with signing up")}, status=status.HTTP_400_BAD_REQUEST)
-
-#         return Response({'detail': _("This profile already exists.")}, status=status.HTTP_400_BAD_REQUEST)
-        
+      
 
 class OwnerSignUpView(generics.GenericAPIView):
     """
