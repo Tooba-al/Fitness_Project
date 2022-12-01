@@ -47,28 +47,23 @@ class UserSignUpView(generics.GenericAPIView):
                                                             last_name = valid.get('last_name'),                                                
                                                             user=User.objects.create(
                                                                     username=s.validated_data.get('username')))
-                    # user = UserProfile.objects.create(
-                    #     user_profile = user_profile,
-                    #     evidence = valid.get('evidence'),
-                    #     bio = valid.get('bio'),
-                    #     address = valid.get('address'), 
-                    #     role = valid.get('role'),
-                    #     specialty = valid.get('specialty')  
-                    # )
+                    user = UserProfile.objects.create(
+                        user_profile = user_profile,
+                    )
                     #wallet = Wallet.objects.create(owner = user_profile)
                     #user_profile.wallet = wallet
                     user_profile.save()
-                    # user.save()
+                    user.save()
 
-                    # upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
+                    upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
 
-                    # if upv['status'] != 201:
-                    #     return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
+                    if upv['status'] != 201:
+                        return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
 
-                    # if settings.DEBUG:
-                    #     return Response({'detail': _("Code sent"), 'code': upv['code']})
+                    if settings.DEBUG:
+                        return Response({'detail': _("Code sent"), 'code': upv['code']})
 
-                    # return Response({'detail': _("Code sent")})
+                    return Response({'detail': _("Code sent")})
 
             except:
                 return Response({'detail': _("Problem with signing up")}, status=status.HTTP_400_BAD_REQUEST)
