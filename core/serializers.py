@@ -42,11 +42,12 @@ class UserSignUpSerializer(serializers.ModelSerializer):
     # waist = serializers.IntegerField(allow_null=True)
     # hip = serializers.IntegerField(allow_null=True)
     # thigh = serializers.IntegerField(allow_null=True)
-    wallet = serializers.CharField()
+    # wallet = serializers.CharField()
 
     class Meta:
         model = UserProfile
-        fields = ['username','password', 'first_name', 'last_name', 'email', 'wallet']
+        # fields = ['username','password', 'first_name', 'last_name', 'email', 'wallet']
+        fields = ['username','password', 'first_name', 'last_name', 'email']
                 #   'height', 'weight', 'arm', 'chest', 'waist', 'hip', 'thigh', 'wallet']
         #read_only_fields = ['wallet']
 
