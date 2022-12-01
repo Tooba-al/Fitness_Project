@@ -12,6 +12,20 @@ from django.utils.translation import gettext as _
 import json
 from sys import platform
 
+
+class UserProfileManager(models.Manager):
+    
+    #def get_by_username(self, username):
+    #     return self.get(username__iexact=username)
+
+    def get_if_available(self, username, email):
+        try:
+            by_username = self.get(username__iexact=username)
+            if by_username == None:
+                return self.get(email = email)
+            return by_username
+        except:
+            return None
         
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="user_profile")
@@ -22,7 +36,7 @@ class UserProfile(models.Model):
     email = models.CharField(max_length =255, unique=True)
     
     # created_at = models.DateTimeField(auto_now_add=True)
-
+    objects = UserProfileManager()
     @property
     def token(self):
         token, created = Token.objects.get_or_create(user=self.user)
