@@ -33,8 +33,8 @@ class UserProfileDataEditSerializer(serializers.ModelSerializer):
         fields =  ['first_name', 'last_name', 'email']
 
 
-class MemberSignUpSerializer(serializers.ModelSerializer):
-    record = serializers.BooleanField(default = False)
+class UserSignUpSerializer(serializers.ModelSerializer):
+    # record = serializers.BooleanField(default = False)
     # height = serializers.IntegerField()
     # weight = serializers.IntegerField()
     # arm = serializers.IntegerField(allow_null=True)
@@ -42,10 +42,9 @@ class MemberSignUpSerializer(serializers.ModelSerializer):
     # waist = serializers.IntegerField(allow_null=True)
     # hip = serializers.IntegerField(allow_null=True)
     # thigh = serializers.IntegerField(allow_null=True)
-    wallet = serializers.IntegerField(default=0)
 
     class Meta:
-        model = Member
+        model = UserProfile
         fields = ['username','password', 'first_name', 'last_name', 'email', 'sex', 'wallet']
                 #   'height', 'weight', 'arm', 'chest', 'waist', 'hip', 'thigh', 'wallet']
         #read_only_fields = ['wallet']
@@ -54,8 +53,15 @@ class OwnerSignUpSerializer(serializers.ModelSerializer):
     club_name = serializers.IntegerField(allow_null=True)
     class Meta:
         model = UserProfile
-        fields = ['username','password', 'first_name', 'last_name', 'email', 'sex', 'club_name']
+        fields = ['username','password', 'first_name', 'last_name', 'email', 'sex', 'club_name', 'club_address']
         #read_only_fields = ['wallet']
+
+# class TrainerSignUpSerializer(serializers.ModelSerializer):
+#     club_name = serializers.IntegerField(allow_null=True)
+#     class Meta:
+#         model = UserProfile
+#         fields = ['username','password', 'first_name', 'last_name', 'email', 'club_name']
+#         #read_only_fields = ['wallet']
 
 class UserProfileEmailVerificationSerializer(serializers.Serializer):
     code = serializers.CharField(max_length=10)

@@ -10,13 +10,13 @@ import ast
 import os
 import datetime
 
-class MemberSignUpView(generics.GenericAPIView):
+class UserSignUpView(generics.GenericAPIView):
     """
         Send verification code
         if send failed respond with wait time
     """
 
-    serializer_class = MemberSignUpSerializer
+    serializer_class = UserSignUpSerializer
 
     def get_object(self):
 
@@ -41,17 +41,17 @@ class MemberSignUpView(generics.GenericAPIView):
                     hash = make_password(valid.get("password"))
                     user_profile = UserProfile.objects.create(username = valid.get('username'),
                                                             password = hash,
-                                                            sex = valid.get('sex'),
+                                                            # sex = valid.get('sex'),
                                                             email = valid.get('email'),
                                                             first_name = valid.get('first_name'),
                                                             last_name = valid.get('last_name'),                                                 
-                                                            weight = valid.get('weight'),                                                 
-                                                            height = valid.get('height'),                                                 
-                                                            arm = valid.get('arm'),                                                 
-                                                            chest = valid.get('chest'),                                                 
-                                                            waist = valid.get('waist'),                                                 
-                                                            hip = valid.get('hip'),                                                 
-                                                            thigh = valid.get('thigh'),                                                 
+                                                            # weight = valid.get('weight'),                                                 
+                                                            # height = valid.get('height'),                                                 
+                                                            # arm = valid.get('arm'),                                                 
+                                                            # chest = valid.get('chest'),                                                 
+                                                            # waist = valid.get('waist'),                                                 
+                                                            # hip = valid.get('hip'),                                                 
+                                                            # thigh = valid.get('thigh'),                                                 
                                                             user=User.objects.create(
                                                             username=s.validated_data.get('username')))
                     member = Member.objects.create(
@@ -110,8 +110,8 @@ class OwnerSignUpView(generics.GenericAPIView):
                     hash = make_password(valid.get("password"))
                     user_profile = UserProfile.objects.create(username = valid.get('username'),
                                                             password = hash,
-                                                            club = valid.get('club'),
-                                                            sex = valid.get('sex'),
+                                                            club_name = valid.get('club_name'),
+                                                            club_address = valid.get('club_address'),
                                                             email = valid.get('email'),
                                                             first_name = valid.get('first_name'),
                                                             last_name = valid.get('last_name'),                                                
@@ -139,6 +139,65 @@ class OwnerSignUpView(generics.GenericAPIView):
                 return Response({'detail': _("Problem with signing up")}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'detail': _("This profile already exists.")}, status=status.HTTP_400_BAD_REQUEST)
+
+# class TrainerSignUpView(generics.GenericAPIView):
+#     """
+#         Send verification code
+#         if send failed respond with wait time
+#     """
+
+#     serializer_class = TrainerSignUpSerializer
+
+#     def get_object(self):
+#         email = self.request.data.get('email')
+#         username = self.request.data.get('username')
+
+#         try:
+#             return UserProfile.objects.get_if_available(username, email)
+#         except UserProfile.DoesNotExist:
+#             return None
+
+#     def post(self, request, *args, **kwargs):
+#         s = self.serializer_class(data=request.data)
+#         s.is_valid(raise_exception=True)
+
+#         user_profile = self.get_object()
+
+#         if not user_profile:
+#             try:
+#                 with transaction.atomic():
+#                     valid = s.validated_data
+#                     hash = make_password(valid.get("password"))
+#                     user_profile = UserProfile.objects.create(username = valid.get('username'),
+#                                                             password = hash,
+#                                                             club_name = valid.get('club_name'),
+#                                                             email = valid.get('email'),
+#                                                             first_name = valid.get('first_name'),
+#                                                             last_name = valid.get('last_name'),                                                
+#                                                             user=User.objects.create(
+#                                                             username=s.validated_data.get('username')))
+#                     owner = Owner.objects.create(
+#                         user_profile = user_profile,
+#                     )
+#                     #wallet = Wallet.objects.create(owner = user_profile)
+#                     #user_profile.wallet = wallet
+#                     user_profile.save()
+#                     owner.save()
+
+#                     upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
+
+#                     if upv['status'] != 201:
+#                         return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
+
+#                     if settings.DEBUG:
+#                         return Response({'detail': _("Code sent"), 'code': upv['code']})
+
+#                     return Response({'detail': _("Code sent")})
+
+#             except:
+#                 return Response({'detail': _("Problem with signing up")}, status=status.HTTP_400_BAD_REQUEST)
+
+#         return Response({'detail': _("This profile already exists.")}, status=status.HTTP_400_BAD_REQUEST)
 
 class RetrieveUserProfileDataView(generics.RetrieveAPIView):
     serializer_class = UserProfileDataSerializer

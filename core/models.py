@@ -14,21 +14,13 @@ from sys import platform
 
         
 class UserProfile(models.Model):
-    Male = 0
-    Female = 1
-
-    genders = (
-        (Male, "Male"),
-        (Female, "Female")
-    )
-    
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="user_profile")
     username = models.CharField(max_length=32, blank=False, null=True, unique=True)
     password = models.CharField(max_length=100, blank=False, null=True)
     first_name = models.CharField(max_length=100, blank=True, null=True)
     last_name = models.CharField(max_length=100, blank=True, null=True)
     email = models.CharField(max_length =255, unique=True)
-    sex = models.IntegerField(choices=genders, default=Male)
+    
     # created_at = models.DateTimeField(auto_now_add=True)
 
     @property
@@ -164,9 +156,18 @@ def send_verification_email(sender, instance, created, **kwargs):
         
 # model Member
 class Member(models.Model):    
+    Male = 0
+    Female = 1
+
+    genders = (
+        (Male, "Male"),
+        (Female, "Female")
+    )
+    
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name="member")
     height = models.IntegerField(default=165)
     weight = models.IntegerField(default=60)
+    sex = models.IntegerField(choices=genders, default=Male)
     # arm = models.IntegerField(max_length =255, null=True, blank=True)
     # chest = models.IntegerField(max_length =255, null=True, blank=True)
     # waist = models.IntegerField(max_length =255, null=True, blank=True)
