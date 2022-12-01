@@ -11,7 +11,7 @@ import os
 import datetime
 
 
-class UserSignUpView(generics.GenericAPIView):
+class UserSignUpView(generics.ListCreateAPIView):
     """
         Send verification code
         if send failed respond with wait time
@@ -39,14 +39,13 @@ class UserSignUpView(generics.GenericAPIView):
                 with transaction.atomic():
                     valid = s.validated_data
                     hash = make_password(valid.get("password"))
-                    user_profile = UserProfile.objects.create(phone_number=valid.get('phone_number'),
-                                                            username = valid.get('username'),
+                    user_profile = UserProfile.objects.create(username = valid.get('username'),
                                                             password = hash,
                                                             email = valid.get('email'),
                                                             first_name = valid.get('first_name'),
                                                             last_name = valid.get('last_name'),                                                
                                                             user=User.objects.create(
-                                                                    username=s.validated_data.get('username')))
+                                                                username=s.validated_data.get('username')))
                     # user = UserProfile.objects.create(
                     #     user_profile = user_profile,
                     # )
@@ -56,7 +55,6 @@ class UserSignUpView(generics.GenericAPIView):
                     # user.save()
 
                     upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
-                    print(upv['status'])
                     if upv['status'] != 201:
                         return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
 

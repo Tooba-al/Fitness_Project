@@ -43,7 +43,7 @@ class UserSignUpSerializer(serializers.ModelSerializer):
     # hip = serializers.IntegerField(allow_null=True)
     # thigh = serializers.IntegerField(allow_null=True)
     # wallet = serializers.CharField()
-
+    
     class Meta:
         model = UserProfile
         # fields = ['username','password', 'first_name', 'last_name', 'email', 'wallet']
