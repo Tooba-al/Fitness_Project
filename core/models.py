@@ -1,6 +1,6 @@
 from django.db import models, transaction
 from django.contrib.auth.models import User
-from .email import *
+# from .email import *
 from .helpers import *
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
@@ -43,68 +43,68 @@ class UserProfile(models.Model):
         return token.key
     
 
-class UserProfileVerificationObjectManager(models.Manager):
-    def create(self, **kwargs):
-        created = False
+# class UserProfileVerificationObjectManager(models.Manager):
+#     def create(self, **kwargs):
+#         created = False
 
-        with transaction.atomic():
-            user_profile = kwargs.get('user_profile')
+#         with transaction.atomic():
+#             user_profile = kwargs.get('user_profile')
 
-            # lock the user profile to prevent concurrent creations
-            user_profile = UserProfile.objects.select_for_update().get(pk=user_profile.pk)
+#             # lock the user profile to prevent concurrent creations
+#             user_profile = UserProfile.objects.select_for_update().get(pk=user_profile.pk)
 
-            time = timezone.now() - timezone.timedelta(minutes=UserProfileEmailVerification.RETRY_TIME)
+#             time = timezone.now() - timezone.timedelta(minutes=UserProfileEmailVerification.RETRY_TIME)
 
-            # select the latest valid user profile phone verification object
-            user_profile_email = UserProfileEmailVerification.objects.order_by('-created_at'). \
-                filter(created_at__gte=time,
-                       user_profile__email=user_profile.email) \
-                .last()
+#             # select the latest valid user profile phone verification object
+#             user_profile_email = UserProfileEmailVerification.objects.order_by('-created_at'). \
+#                 filter(created_at__gte=time,
+#                        user_profile__email=user_profile.email) \
+#                 .last()
 
-            # create a new object if none exists
-            if not user_profile_email:
-                obj = UserProfileEmailVerification(**kwargs)
-                obj.save()
-                created = True
+#             # create a new object if none exists
+#             if not user_profile_email:
+#                 obj = UserProfileEmailVerification(**kwargs)
+#                 obj.save()
+#                 created = True
 
-        if created:
-            if settings.DEBUG:
-                return {'status': 201, 'obj': obj, 'code': obj.code}
-            return {'status': 201, 'obj': obj}
+#         if created:
+#             if settings.DEBUG:
+#                 return {'status': 201, 'obj': obj, 'code': obj.code}
+#             return {'status': 201, 'obj': obj}
 
-        return {'status': 403,
-                'wait': timezone.timedelta(minutes=UserProfileEmailVerification.RETRY_TIME) +
-                        (user_profile_email.created_at - timezone.now())}
+#         return {'status': 403,
+#                 'wait': timezone.timedelta(minutes=UserProfileEmailVerification.RETRY_TIME) +
+#                         (user_profile_email.created_at - timezone.now())}
 
 
-class UserProfileEmailVerification(models.Model):
-    """
-        Used for phone verification by sms
-        auto generates a 5 digit code
-        limits select querying
-        time intervals between consecutive creation
-    """
+# class UserProfileEmailVerification(models.Model):
+#     """
+#         Used for phone verification by sms
+#         auto generates a 5 digit code
+#         limits select querying
+#         time intervals between consecutive creation
+#     """
 
-    RETRY_TIME = 2
-    MAX_QUERY = 5
+#     RETRY_TIME = 2
+#     MAX_QUERY = 5
 
-    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="emails")
-    code = models.CharField(max_length=13, default=generate_code)
-    created_at = models.DateTimeField(auto_now_add=True)
-    query_times = models.IntegerField(default=0)
-    used = models.BooleanField(default=False)
-    burnt = models.BooleanField(default=False)
+#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="emails")
+#     code = models.CharField(max_length=13, default=generate_code)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     query_times = models.IntegerField(default=0)
+#     used = models.BooleanField(default=False)
+#     burnt = models.BooleanField(default=False)
 
-    objects = UserProfileVerificationObjectManager()
+#     objects = UserProfileVerificationObjectManager()
 
-@receiver(post_save, sender=UserProfileEmailVerification)
-def send_verification_email(sender, instance, created, **kwargs):
-    """
-        send the verification code if a new object is created
-    """
-    if created:
-        # send_verification_code(instance.user_profile.email, instance.code)
-        send_code_email(instance.user_profile.first_name, instance.user_profile.email, instance.code)
+# @receiver(post_save, sender=UserProfileEmailVerification)
+# def send_verification_email(sender, instance, created, **kwargs):
+#     """
+#         send the verification code if a new object is created
+#     """
+#     if created:
+#         # send_verification_code(instance.user_profile.email, instance.code)
+#         send_code_email(instance.user_profile.first_name, instance.user_profile.email, instance.code)
        
 class ForgetPasswordLinkObjectManager(models.Manager):
     def create(self, **kwargs):
@@ -136,8 +136,9 @@ class ForgetPasswordLinkObjectManager(models.Manager):
             return {'status': 201, 'obj': obj}
 
         return {'status': 403,
-                'wait': timezone.timedelta(minutes=UserProfileEmailVerification.RETRY_TIME) +
-                        (user_profile_email.created_at - timezone.now())}
+                # 'wait': timezone.timedelta(minutes=UserProfileEmailVerification.RETRY_TIME) +
+                #         (user_profile_email.created_at - timezone.now())
+                }
 
 
 
@@ -152,17 +153,17 @@ class ForgetPasswordLink(models.Model):
     objects = ForgetPasswordLinkObjectManager()
 
 @receiver(post_save, sender=ForgetPasswordLink)
-def send_verification_email(sender, instance, created, **kwargs):
-    """
-        send the change password if a new object is created
-    """
-    if created:
-        #send_verification_code(instance.user_profile.email, instance.code)
-        #link_text = "/api/v1/change_password/" + instance.link + "/"
-        #link = request.build_absolute_uri(link_text)
-        #link = str(request.get_host) + link_text
-        #link = request.build_absolute_uri(reverse('view_name', args=(instance.link, )))
-        send_change_password_email(instance.user_profile.first_name, instance.user_profile.email, instance.link)
+# def send_verification_email(sender, instance, created, **kwargs):
+#     """
+#         send the change password if a new object is created
+#     """
+#     if created:
+#         #send_verification_code(instance.user_profile.email, instance.code)
+#         #link_text = "/api/v1/change_password/" + instance.link + "/"
+#         #link = request.build_absolute_uri(link_text)
+#         #link = str(request.get_host) + link_text
+#         #link = request.build_absolute_uri(reverse('view_name', args=(instance.link, )))
+#         send_change_password_email(instance.user_profile.first_name, instance.user_profile.email, instance.link)
 
         
         

@@ -62,12 +62,12 @@ class UserSignUpView(generics.GenericAPIView):
                                                             username=s.validated_data.get('username')))
                 user_profile.save()
 
-                upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
-                if upv['status'] != 201:
-                    return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
+                # upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
+                # if upv['status'] != 201:
+                #     return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
 
-                if settings.DEBUG:
-                    return Response({'detail': _("Code sent"), 'code': upv['code']})
+                # if settings.DEBUG:
+                #     return Response({'detail': _("Code sent"), 'code': upv['code']})
 
                 return Response({'detail': _("wellcome :)")})
 
@@ -122,13 +122,13 @@ class OwnerSignUpView(generics.GenericAPIView):
                     user_profile.save()
                     owner.save()
 
-                    upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
+                    # upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
 
-                    if upv['status'] != 201:
-                        return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
+                    # if upv['status'] != 201:
+                    #     return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
 
-                    if settings.DEBUG:
-                        return Response({'detail': _("Code sent"), 'code': upv['code']})
+                    # if settings.DEBUG:
+                    #     return Response({'detail': _("Code sent"), 'code': upv['code']})
 
                     return Response({'detail': _("Code sent")})
 
@@ -218,52 +218,52 @@ class RetrieveUserProfileEditView(generics.RetrieveUpdateAPIView):
             return None
 
 
-class UserProfileAuthTokenView(generics.CreateAPIView):
-    """
-        match Email and verification code
-        return user token on success
-    """
+# class UserProfileAuthTokenView(generics.CreateAPIView):
+#     """
+#         match Email and verification code
+#         return user token on success
+#     """
 
-    serializer_class = UserProfileEmailVerificationSerializer
+#     serializer_class = UserProfileEmailVerificationSerializer
 
-    def post(self, request, *args, **kwargs):
+#     def post(self, request, *args, **kwargs):
 
-        email = request.data.get('email')
-        code = request.data.get('code')
+#         email = request.data.get('email')
+#         code = request.data.get('code')
 
-        user_profile_email_ = UserProfileEmailVerification.objects.order_by('created_at'). \
-            filter(
-            query_times__lt=UserProfileEmailVerification.MAX_QUERY,
-            used=False,
-            burnt=False,
-            user_profile__email=email
-        )
-        user_profile_email = user_profile_email_.last()
+#         user_profile_email_ = UserProfileEmailVerification.objects.order_by('created_at'). \
+#             filter(
+#             query_times__lt=UserProfileEmailVerification.MAX_QUERY,
+#             used=False,
+#             burnt=False,
+#             user_profile__email=email
+#         )
+#         user_profile_email = user_profile_email_.last()
 
-        if not user_profile_email:
-            return Response({'detail': _('Email not found')}, status=status.HTTP_404_NOT_FOUND)
+#         if not user_profile_email:
+#             return Response({'detail': _('Email not found')}, status=status.HTTP_404_NOT_FOUND)
 
-        if code != user_profile_email.code:
-            user_profile_email.query_times += 1
-            user_profile_email.save()
+#         if code != user_profile_email.code:
+#             user_profile_email.query_times += 1
+#             user_profile_email.save()
 
-            return Response({'detail': _('Invalid verification code'),
-                             'allowed_retry_times':
-                                 UserProfileEmailVerification.MAX_QUERY -
-                                 user_profile_email.query_times},
-                            status=status.HTTP_403_FORBIDDEN)
+#             return Response({'detail': _('Invalid verification code'),
+#                              'allowed_retry_times':
+#                                  UserProfileEmailVerification.MAX_QUERY -
+#                                  user_profile_email.query_times},
+#                             status=status.HTTP_403_FORBIDDEN)
 
-        user_profile_email.user_profile.save()
-        token, created = Token.objects.get_or_create(user=user_profile_email.user_profile.user)
+#         user_profile_email.user_profile.save()
+#         token, created = Token.objects.get_or_create(user=user_profile_email.user_profile.user)
 
-        user_profile_email.used = True
-        user_profile_email.save()
+#         user_profile_email.used = True
+#         user_profile_email.save()
 
-        # mark all other codes as burnt
-        user_profile_email_.update(burnt=True)
+#         # mark all other codes as burnt
+#         user_profile_email_.update(burnt=True)
 
-        #return Response({'phone_number': phone, 'token': token.key})
-        return Response({'detail': _('You are verified.'), 'token': token.key})
+#         #return Response({'phone_number': phone, 'token': token.key})
+#         return Response({'detail': _('You are verified.'), 'token': token.key})
 
 class LoginView(generics.GenericAPIView):
 
@@ -364,13 +364,13 @@ class ResendVerificationCodeView(generics.CreateAPIView):
                 valid = s.validated_data
                 user_profile = UserProfile.objects.get(email = valid.get('email'))
 
-                upv = UserProfileEmailVerification.objects.create(user_profile=user_profile)
+                # upv = UserProfileEmailVerification.objects.create(user_profile=user_profile)
 
-                if upv['status'] != 201:
-                    return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
+                # if upv['status'] != 201:
+                #     return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
 
-                if settings.DEBUG:
-                    return Response({'detail': _("Code sent"), 'code': upv['code']})
+                # if settings.DEBUG:
+                #     return Response({'detail': _("Code sent"), 'code': upv['code']})
 
                 return Response({'detail': _("Code sent")})
 

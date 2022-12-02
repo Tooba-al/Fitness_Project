@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import *
 
 admin.site.register(UserProfile)
-admin.site.register(UserProfileEmailVerification)
+# admin.site.register(UserProfileEmailVerification)
 admin.site.register(ForgetPasswordLink)
 admin.site.register(Member)
 admin.site.register(Trainer)

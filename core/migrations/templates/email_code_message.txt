@@ -1,0 +1,6 @@
+Hello {{name|safe}}
+Here is the verification code:
+
+{{code|safe}}
+
+Thank you for using our service!
