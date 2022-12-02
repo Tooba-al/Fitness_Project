@@ -181,7 +181,7 @@ class Member(models.Model):
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name="member")
     height = models.IntegerField(default=165)
     weight = models.IntegerField(default=60)
-    sex = models.IntegerField(choices=genders, default=Male)
+    # sex = models.IntegerField(choices=genders, default=Male)
     # arm = models.IntegerField(max_length =255, null=True, blank=True)
     # chest = models.IntegerField(max_length =255, null=True, blank=True)
     # waist = models.IntegerField(max_length =255, null=True, blank=True)

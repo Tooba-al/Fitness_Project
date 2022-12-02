@@ -194,7 +194,7 @@ class EMRSerializer(serializers.ModelSerializer):
 class ClubSerializer(serializers.ModelSerializer):
     class Meta:
         model = Club
-        fields = ['name','trainers', 'first_name', 'last_name', 'email', 'sex', 'wallet']
+        fields = ['name','trainers', 'first_name', 'last_name', 'email', 'wallet']
 
     
 class ClubListSerializer(serializers.ModelSerializer):
