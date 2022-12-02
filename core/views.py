@@ -101,39 +101,43 @@ class OwnerSignUpView(generics.GenericAPIView):
         user_profile = self.get_object()
 
         if not user_profile:
-            try:
-                with transaction.atomic():
-                    valid = s.validated_data
-                    hash = make_password(valid.get("password"))
-                    user_profile = UserProfile.objects.create(username = valid.get('username'),
-                                                            password = hash,
-                                                            club_name = valid.get('club_name'),
-                                                            club_address = valid.get('club_address'),
-                                                            email = valid.get('email'),
-                                                            first_name = valid.get('first_name'),
-                                                            last_name = valid.get('last_name'),                                                
-                                                            user=User.objects.create(
-                                                            username=s.validated_data.get('username')))
-                    owner = Owner.objects.create(
-                        user_profile = user_profile,
-                    )
-                    #wallet = Wallet.objects.create(owner = user_profile)
-                    #user_profile.wallet = wallet
-                    user_profile.save()
-                    owner.save()
+            # try:
+            with transaction.atomic():
+                valid = s.validated_data
+                hash = make_password(valid.get("password"))
+                user_profile = UserProfile.objects.create(username = valid.get('username'),
+                                                        password = hash,
+                                                        email = valid.get('email'),
+                                                        first_name = valid.get('first_name'),
+                                                        last_name = valid.get('last_name'),                                                
+                                                        user=User.objects.create(
+                                                        username=s.validated_data.get('username')))
+                owner = Owner.objects.create(
+                    user_profile = user_profile,
+                )
+                club = Club.objects.create(
+                    owner = owner,
+                    name = valid.get('club_name'),
+                    address = valid.get('club_address'),
+                )
+                #wallet = Wallet.objects.create(owner = user_profile)
+                #user_profile.wallet = wallet
+                user_profile.save()
+                owner.save()
+                club.save()
 
-                    # upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
+                # upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
 
-                    # if upv['status'] != 201:
-                    #     return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
+                # if upv['status'] != 201:
+                #     return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
 
-                    # if settings.DEBUG:
-                    #     return Response({'detail': _("Code sent"), 'code': upv['code']})
+                # if settings.DEBUG:
+                #     return Response({'detail': _("Code sent"), 'code': upv['code']})
 
-                    return Response({'detail': _("Code sent")})
+                return Response({'detail': _("wellcome back :*")})
 
-            except:
-                return Response({'detail': _("Problem with signing up")}, status=status.HTTP_400_BAD_REQUEST)
+            # except:
+            #     return Response({'detail': _("Problem with signing up")}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'detail': _("This profile already exists.")}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -202,7 +206,7 @@ class RetrieveUserProfileDataView(generics.RetrieveAPIView):
 
     def get_object(self):
         try:
-            return self.request.user.user_profile
+            return self.request.user
         except UserProfile.DoesNotExist:
             return None
 
@@ -213,7 +217,7 @@ class RetrieveUserProfileEditView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         try:
-            return self.request.user.user_profile
+            return self.request.user
         except UserProfile.DoesNotExist:
             return None
 

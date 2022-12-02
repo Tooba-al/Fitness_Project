@@ -199,6 +199,7 @@ class Trainer(models.Model):
 class Owner(models.Model):
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name="owner")
     # club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="club")
+    
 
 class Club(models.Model):
     owner = models.OneToOneField(Owner, on_delete=models.CASCADE, related_name="club")
@@ -206,7 +207,7 @@ class Club(models.Model):
     # trainers = models.ManyToManyField(Trainer, related_name="trainers", blank=True)
     name = models.CharField(max_length=32)
     address = models.TextField(max_length=500)
-    phone_number = models.CharField(max_length=12)
+    # phone_number = models.CharField(max_length=12)
 
 class Event(models.Model):
     owner = models.ForeignKey(Owner, on_delete=models.CASCADE, related_name="send_event_owner")

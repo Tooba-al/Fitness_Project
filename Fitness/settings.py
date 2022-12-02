@@ -151,7 +151,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # DEFAULT_FROM_EMAIL = 'emailservice.umind@gmail.com'
 
 # DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATE_CONTEXT_PROCESSORS = [
                                 'django.core.context_processors.request',]
