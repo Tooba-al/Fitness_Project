@@ -119,7 +119,7 @@ class OwnerSignUpView(generics.GenericAPIView):
                 # if settings.DEBUG:
                 #     return Response({'detail': _("Code sent"), 'code': upv['code']})
 
-                return Response({'detail': _("wellcome back :*")})
+                return Response({'detail': _("wellcome!")})
 
             # except:
             #     return Response({'detail': _("Problem with signing up")}, status=status.HTTP_400_BAD_REQUEST)

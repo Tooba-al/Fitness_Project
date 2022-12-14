@@ -201,11 +201,14 @@ class Member(models.Model):
 # model Club
 class Trainer(models.Model):
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name="trainer")
+    def __str__(self):
+        return self.user_profile.username
 
 class Owner(models.Model):
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name="owner")
     # club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="club")
-    
+    def __str__(self):
+        return self.user_profile.username
 
 class Club(models.Model):
     owner = models.OneToOneField(Owner, on_delete=models.CASCADE, related_name="club")
@@ -214,6 +217,8 @@ class Club(models.Model):
     name = models.CharField(max_length=32)
     address = models.TextField(max_length=500)
     # phone_number = models.CharField(max_length=12)
+    def __str__(self):
+        return (self.owner.user_profile.username + " -> " + self.name)
 
 class Event(models.Model):
     owner = models.ForeignKey(Owner, on_delete=models.CASCADE, related_name="send_event_owner")
