@@ -18,20 +18,6 @@ class UserSignUpView(generics.GenericAPIView):
     """
 
     serializer_class = UserSignUpSerializer
-    # def post(self, request, *args, **kwargs):
-    #     s = self.get_serializer(data=request.data)
-    #     s.is_valid(raise_exception=True)
-    #     user = UserProfile.objects.create(s.validated_data['username'], 
-    #                                     s.validated_data['email'], 
-    #                                     s.validated_data['password'], 
-    #                                     s.validated_data['first_name'],
-    #                                     s.validated_data['last_name'],)
-    #     user = s.save()
-    #     return Response({
-    #     "user": UserSignUpSerializer(user
-    #                                 , context=self.get_serializer_context()).data,
-    #     # "token": AuthToken.objects.create(user)[1]
-    #     })
 
     def get_object(self):
         email = self.request.data.get('email')
@@ -61,13 +47,12 @@ class UserSignUpView(generics.GenericAPIView):
                                                         user=User.objects.create(
                                                             username=s.validated_data.get('username')))
                 user_profile.save()
-
-                # upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
-                # if upv['status'] != 201:
-                #     return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
-
-                # if settings.DEBUG:
-                #     return Response({'detail': _("Code sent"), 'code': upv['code']})
+                member = Member.objects.create(user_profile = user_profile,
+                                                sex = 0,
+                                                height = 165,
+                                                weight = 60,
+                                                wallet = 0)
+                member.save()
 
                 return Response({'detail': _("wellcome :)")})
 
