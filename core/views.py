@@ -270,15 +270,16 @@ class LoginView(generics.GenericAPIView):
 
         if not user_profile:
             return Response({'detail': _('Username not found')}, status=status.HTTP_404_NOT_FOUND)
-        try:
-            if(check_password(password, user_profile.password)):
-                token = Token.objects.get(user=user_profile.user)
-                data = UserProfileDataSerializer(instance = user_profile).data
-                return Response({'data': data, 'token': token.key})
-            else:
-                return Response({'detail': _('Wrong password'),}, status=status.HTTP_404_NOT_FOUND)
-        except:
-            return Response({'detail': _('You may not be verified yet.'),}, status=status.HTTP_404_NOT_FOUND)
+        # try:
+        if(check_password(password, user_profile.password)):
+            # token = Token.objects.get(user=user_profile.user)
+            data = UserProfileDataSerializer(instance = user_profile).data
+            # return Response({'data': data, 'token': token.key})
+            return Response({'data': data,})
+        else:
+            return Response({'detail': _('Wrong password'),}, status=status.HTTP_404_NOT_FOUND)
+        # except:
+        #     return Response({'detail': _('You may not be verified yet.'),}, status=status.HTTP_404_NOT_FOUND)
 
 
 class ForgetPasswordView(generics.CreateAPIView):

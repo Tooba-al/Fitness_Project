@@ -42,6 +42,9 @@ class UserProfile(models.Model):
         token, created = Token.objects.get_or_create(user=self.user)
         return token.key
     
+    def __str__(self):
+        return self.username
+   
 
 # class UserProfileVerificationObjectManager(models.Manager):
 #     def create(self, **kwargs):
@@ -152,7 +155,7 @@ class ForgetPasswordLink(models.Model):
 
     objects = ForgetPasswordLinkObjectManager()
 
-@receiver(post_save, sender=ForgetPasswordLink)
+# @receiver(post_save, sender=ForgetPasswordLink)
 # def send_verification_email(sender, instance, created, **kwargs):
 #     """
 #         send the change password if a new object is created
