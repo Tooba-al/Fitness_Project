@@ -243,18 +243,20 @@ class Target(models.Model):
     
 # Trainer-Club Relation
 class TCR(models.Model):
-    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="trainers_rels")
-    club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="club_rels")
+    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="TCR_trainers")
+    club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="TCR_club")
     
 
 # Member-Club Relation
 class MCR(models.Model):
-    pass
+    club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="MCR_club")
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="MCR_member")
+    
     
 # Event-Members Relation
 class EMR(models.Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="event")
-    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="member")
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="EMR_event")
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="EMR_member")
     isRegistered = models.BooleanField(default=False)
     
     

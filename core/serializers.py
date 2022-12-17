@@ -115,6 +115,7 @@ class MemberSerializer(serializers.ModelSerializer):
         _profile_data['username'] = _user_profile.username
         _profile_data['first_name'] = _user_profile.first_name
         _profile_data['last_name'] = _user_profile.last_name
+        return _profile_data
         
 class OwnerSerializer(serializers.ModelSerializer):
     profile_data = serializers.SerializerMethodField()
@@ -345,4 +346,14 @@ class ProgramListSerializer(serializers.ModelSerializer):
         _club_data['name'] = _club.name
         _club_data['address'] = _club.address
         return _club_data
+    
+
+class EnrollProgramSerializer(serializers.Serializer):
+    member_username = serializers.CharField(max_length=32)
+    program_name = serializers.CharField(max_length=32)
+    
+
+class EnrollMemberToClubSerializer(serializers.Serializer):
+    member_username = serializers.CharField(max_length=32)
+    club_name = serializers.CharField(max_length=32)
     
