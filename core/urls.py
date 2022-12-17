@@ -28,7 +28,20 @@ urlpatterns = [
     path('profile/data/', RetrieveUserProfileDataView.as_view()),
     path('profile/edit/', RetrieveUserProfileEditView.as_view()),
     path('profile/add-to-wallet/', AddToWalletView.as_view()),
-    path('login/', LoginView.as_view()),
+    
+    path('member/list/', ShowMemberListView.as_view()),
+    
+    path('owner/list/', ShowOwnerListView.as_view()),
+    path('club/list/', ShowClubListView.as_view()),
+    
+    path('event/create/', AddToWalletView.as_view()),
+    
+    path('trainer/list/', ShowTrainerListView.as_view()),
+    path('trainer/add/', AddTrainerView.as_view()),
+    
+    path('program/create/', CreateProgramView.as_view()),
+    path('program/list/', ProgramListView.as_view()),
+    
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),

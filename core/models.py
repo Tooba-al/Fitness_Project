@@ -257,3 +257,13 @@ class EMR(models.Model):
     member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="member")
     isRegistered = models.BooleanField(default=False)
     
+    
+class Program(models.Model):
+    name = models.CharField(max_length=50)
+    price = models.IntegerField(default=0)
+    image = models.ImageField(upload_to=None, height_field=None, width_field=None, max_length=100, null = True, blank = True)
+    # owner = models.ForeignKey(Owner, on_delete=models.CASCADE, related_name="program_owner")
+    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="program_trainer")
+    club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="program_club")
+    
+    

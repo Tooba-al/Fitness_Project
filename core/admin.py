@@ -9,7 +9,10 @@ admin.site.register(Trainer)
 admin.site.register(Owner)
 admin.site.register(Club)
 admin.site.register(Event)
+admin.site.register(EMR)
 admin.site.register(Target)
 admin.site.register(TargetCategory)
 admin.site.register(TCR)
-admin.site.register(EMR)
+admin.site.register(Program)
+
+
