@@ -9,10 +9,12 @@ admin.site.register(Trainer)
 admin.site.register(Owner)
 admin.site.register(Club)
 admin.site.register(Event)
-admin.site.register(EMR)
-admin.site.register(Target)
 admin.site.register(TargetCategory)
-admin.site.register(TCR)
+admin.site.register(Target)
+admin.site.register(TCR)        # Trainer-Club Relation
+admin.site.register(MCR)        # Member-Club Relation
+admin.site.register(EMR)        # Event-Members Relation
 admin.site.register(Program)
+admin.site.register(MPR)        # Member-Program Relation
 
 

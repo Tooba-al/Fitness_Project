@@ -228,6 +228,11 @@ class Event(models.Model):
     date = models.DateField(null = True, blank = True)
     capacity = models.IntegerField(default=0)
     attachment = models.ImageField(upload_to=None, height_field=None, width_field=None, max_length=100, null = True, blank = True)
+    
+    def __str__(self):
+        return (self.owner.user_profile.username +
+                "->" + self.title)
+ 
  
 class TargetCategory(models.Model):
     name = models.CharField(max_length=110)
@@ -240,6 +245,10 @@ class Target(models.Model):
     num_days = models.IntegerField(default=0, blank=True, null=True)
     target_height = models.IntegerField(default=165, blank=True, null=True)
     target_weight = models.IntegerField(default=60, blank=True, null=True)
+    def __str__(self):
+        return (self.member.user_profile.username + 
+                "->" + self.category.name)
+    
     
 # Trainer-Club Relation
 class TCR(models.Model):
@@ -267,5 +276,15 @@ class Program(models.Model):
     # owner = models.ForeignKey(Owner, on_delete=models.CASCADE, related_name="program_owner")
     trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="program_trainer")
     club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="program_club")
+    
+    def __str__(self):
+        return (self.trainer.user_profile.username + "->" + self.name)
+    
+# Member-Program Relation
+class MPR(models.Model):
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name="MPR_program")
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="MPR_member")
+    is_finished = models.BooleanField(default=False)
+    
     
     

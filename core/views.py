@@ -648,16 +648,13 @@ class EnrollProgramView(generics.GenericAPIView):
 
 
 
-class EnrollMemberToClubView(generics.GenericAPIView):
-    serializer_class = EnrollMemberToClubSerializer
+class JoinToClubView(generics.GenericAPIView):
+    serializer_class = JoinToClubSerializer
     
     def get_object(self):
         try:
-            club_name = self.request.data.get('club_name')
-            print(self.request.data.get('club_name'))
-            club = Club.objects.get(name = club_name)
-            print(club)
-            return Club
+            club = Club.objects.get(name = self.request.data.get('club_name'))
+            return club
         except:
             return None
     
@@ -666,24 +663,47 @@ class EnrollMemberToClubView(generics.GenericAPIView):
         s.is_valid(raise_exception=True)
         valid = s.validated_data
         
-        club = Club.objects.get(name = valid.get('club_name'))
-        print(":/1")
-        print(club)
+        club = self.get_object()
         if club!=None:
-            print(":/2")
             member = Member.objects.get(user_profile__username=valid.get('member_username'))
-            print(":/3")
             mcr = MCR.objects.create(
                 member = member,
                 club = club,
             )
-            print(":/4")
             mcr.save()
-            print(":/5")
             return Response({'detail': _('Member enrolled to this club successfully')})
         
         return Response({'detail': _("There was a problem with enrolling to club.")}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class MembersEnrolledClubs(generics.ListAPIView):
-    pass
+class EnrollToProgram(generics.GenericAPIView):
+    serializer_class = EnrollProgramSerializer
+    
+    def get_object(self):
+        try:
+            program = Program.objects.get(name = self.request.data.get('program_name'))
+            return program
+        except:
+            return None
+    
+    def put(self, request, *args, **kwargs):
+        s = self.serializer_class(data=request.data)
+        s.is_valid(raise_exception=True)
+        valid = s.validated_data
+        
+        program = self.get_object()
+        member = Member.objects.get(user_profile__username=valid.get('member_username'))
+        mcr = MCR.objects.get(member = member, club__name = valid.get('club_name'))
+        # if mcr.member==member:
+        if program!=None and mcr.member==member:
+            mpr = MPR.objects.create(
+                member = member,
+                program = program,
+                is_finished = False
+            )
+            mpr.save()
+            return Response({'detail': _('Member enrolled to this club successfully')})
+        
+        return Response({'detail': _("There was a problem with enrolling to club.")}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # return Response({'detail': _("You are not joint to this club.")})

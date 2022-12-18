@@ -30,7 +30,9 @@ urlpatterns = [
     path('profile/add-to-wallet/', AddToWalletView.as_view()),
     
     path('member/list/', ShowMemberListView.as_view()),
-    path('member/enroll/club/', EnrollMemberToClubView.as_view()),
+    path('member/join/club/', JoinToClubView.as_view()),
+    path('member/enroll/program/', EnrollToProgram.as_view()),
+    # path('member/enroll/diet/', .as_view()),
     
     path('owner/list/', ShowOwnerListView.as_view()),
     path('club/list/', ShowClubListView.as_view()),
