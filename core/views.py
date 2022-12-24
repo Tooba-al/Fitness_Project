@@ -587,7 +587,16 @@ class AddToWalletView(generics.RetrieveAPIView):
     queryset = Member.objects.all()
     serializer_class = AddToWalletSerializer
 
+    def get_object(self):
+        try:
+            username = self.request.data.get('username')
+            user_profile = UserProfile.objects.get(user_profile__username = username)
+            return user_profile
+        except UserProfile.DoesNotExist:
+            return None
+
     def put(self, request, *args, **kwargs):
+        user_profile = self.get_object()
         user_request_data = self.serializer_class(data=request.data)
         user_request_data.is_valid(raise_exception=True)
         
@@ -595,9 +604,10 @@ class AddToWalletView(generics.RetrieveAPIView):
             with transaction.atomic():
                 valid = user_request_data.validated_data
                 
-                member = Member.objects.get(self.request.user.user_profile)
+                # member = Member.objects.get(self.request.user.user_profile)
+                member = Member.objects.get(user = user_profile)
                 member.wallet.remove()
-                member.wallet.add(wallet = AddToWalletSerializer.get_wallet_data + valid.get('wallet'))
+                member.wallet.add(wallet = AddToWalletSerializer.get_wallet_data + valid.get('amount'))
                 member.save()
                     
                 return Response({'detail': _("Your wallet successfuly updated.")}, status=status.HTTP_200_OK)

@@ -269,10 +269,12 @@ class ClubSerializer(serializers.ModelSerializer):
         
 class AddToWalletSerializer(serializers.ModelSerializer):
     wallet_data = serializers.SerializerMethodField()
+    username = serializers.CharField(max_length=32)
+    amount = serializers.IntegerField(default=0)
     
     class Meta:
         model = Member
-        fields = ['id', 'wallet_data']
+        fields = ['id', 'wallet_data', 'username', 'amount']
         
     def get_wallet_data(self, instance):
         _user_profile = instance.user_profile
