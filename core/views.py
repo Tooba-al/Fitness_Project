@@ -318,7 +318,8 @@ class ChangePasswordView(generics.UpdateAPIView):
         try:
             with transaction.atomic():
                 valid = s.validated_data
-                change_link = self.kwargs['change_link']
+                change_link = valid.get('change_link')
+                
 
                 fpl = ForgetPasswordLink.objects.get(link = change_link)
                 time = datetime.datetime.now(datetime.timezone.utc) - fpl.created_at
@@ -339,6 +340,40 @@ class ChangePasswordView(generics.UpdateAPIView):
 
         except ForgetPasswordLink.DoesNotExist:
             return Response({'detail': _("This link isn't valid.")}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class ChangePasswordView(generics.UpdateAPIView):
+
+    # serializer_class = ChangePasswordSerializer
+
+    # def put(self, request, *args, **kwargs):
+    #     s = self.serializer_class(data=request.data)
+    #     s.is_valid(raise_exception=True)
+
+    #     try:
+    #         with transaction.atomic():
+    #             valid = s.validated_data
+    #             change_link = self.kwargs['change_link']
+
+    #             fpl = ForgetPasswordLink.objects.get(link = change_link)
+    #             time = datetime.datetime.now(datetime.timezone.utc) - fpl.created_at
+
+    #             if fpl.used == True:
+    #                 return Response({'detail': _("You have already used this link.")}, status=status.HTTP_400_BAD_REQUEST)
+    #             elif time > datetime.timedelta(hours = 1):
+    #                 return Response({'detail': _("This link has surpassed its valid time.")}, status=status.HTTP_400_BAD_REQUEST)
+    #             else:
+    #                 fpl.used = True
+    #                 new_password = make_password(valid.get("password"))
+    #                 user_profile = fpl.user_profile
+    #                 user_profile.password = new_password
+    #                 user_profile.save()
+    #                 fpl.save()
+    #                 return Response({'detail': _("Your password changed successfully")}, status=status.HTTP_200_OK)
+
+
+    #     except ForgetPasswordLink.DoesNotExist:
+    #         return Response({'detail': _("This link isn't valid.")}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ResendVerificationCodeView(generics.CreateAPIView):
