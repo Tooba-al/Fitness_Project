@@ -32,7 +32,7 @@ urlpatterns = [
     
     path('member/list/', ShowMemberListView.as_view()),
     path('member/join/club/', JoinToClubView.as_view()),
-    path('member/enroll/program/', EnrollToProgram.as_view()),
+    path('member/enroll/program/', EnrollToProgramView.as_view()),
     # path('member/enroll/diet/', .as_view()),
     
     path('owner/list/', ShowOwnerListView.as_view()),

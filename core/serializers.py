@@ -39,24 +39,24 @@ class UserProfileDataEditSerializer(serializers.Serializer):
 # class UserDataSerializer(serializers.ModelSerializer):
 class UserDataSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=100)
-    # class Meta:
-    #     model = UserProfile
-    #     fields =  ['user_username']
-        # fields =  ['user_username', 'username', 'password', 'first_name', 'last_name', 'email']
-        # fields =  ['username', 'password', 'first_name', 'last_name', 'email']
-    profile_data = serializers.SerializerMethodField()
-    
     class Meta:
         model = UserProfile
-        fields = ['id', 'profile_data', 'username']
+    #     fields =  ['user_username']
+        fields =  ['user_username', 'username', 'password', 'first_name', 'last_name', 'email']
+        # fields =  ['username', 'password', 'first_name', 'last_name', 'email']
+    # profile_data = serializers.SerializerMethodField()
+    
+    # class Meta:
+    #     model = UserProfile
+    #     fields = ['id', 'profile_data', 'username']
         
-    def get_profile_data(self, instance):
-        _user_profile = instance.user
-        _profile_data = {}
-        _profile_data['username'] = _user_profile.username
-        _profile_data['first_name'] = _user_profile.first_name
-        _profile_data['last_name'] = _user_profile.last_name
-        return _profile_data
+    # def get_profile_data(self, instance):
+    #     _user_profile = instance.user
+    #     _profile_data = {}
+    #     _profile_data['username'] = _user_profile.username
+    #     _profile_data['first_name'] = _user_profile.first_name
+    #     _profile_data['last_name'] = _user_profile.last_name
+    #     return _profile_data
 
 
 class UserSignUpSerializer(serializers.ModelSerializer):
