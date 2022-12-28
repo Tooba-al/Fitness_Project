@@ -370,6 +370,34 @@ class ProgramListSerializer(serializers.ModelSerializer):
         _club_data['address'] = _club.address
         return _club_data
     
+    
+# class MemberProgramShowToOwnerSerializer(serializers.Serializer):
+#     club_name = serializers.CharField(max_length = 32)
+#     member_data = serializers.SerializerMethodField()
+#     program_data = serializers.SerializerMethodField()
+    
+#     class Meta:
+#         model = Program
+#         fields = ['id', 'club_name', 'member_data', 'program_data']
+#         # fields = ['name', 'price', 'image']
+        
+#     def get_member_data(self, instance):
+#         _user_profile = instance.member.user_profile
+#         _member_data = {}
+#         _member_data['first_name'] = _user_profile.first_name
+#         _member_data['last_name'] = _user_profile.last_name
+#         _member_data['height'] = _user_profile.height
+#         _member_data['weight'] = _user_profile.weight
+#         _member_data['sex'] = _user_profile.sex
+#         return _member_data
+        
+#     def get_program_data(self, instance):
+#         _program = instance.program
+#         _program_data = {}
+#         _program_data['name'] = _program.name
+#         _program_data['trainer'] = _program.trainer.username
+#         _program_data['club'] = _program.club.name
+#         return _program_data
 
 class EnrollProgramSerializer(serializers.Serializer):
     member_username = serializers.CharField(max_length=32)

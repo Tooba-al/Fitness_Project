@@ -726,7 +726,42 @@ class CreateProgramView(generics.GenericAPIView):
 
 
 class MemberProgramShowToOnwer(generics.ListAPIView):
-    pass
+    # queryset = Program.objects.all()
+    # serializer_class = MemberProgramShowToOwnerSerializer
+    serializer_class = ProgramSerializer
+    
+    def get_object(self):
+        try:
+            club_name = Club.objects.get(
+                owner__user_profile__username = self.kwargs['owner_username'])
+            program = Program.objects.get(club__name = club_name)
+            return MPR.objects.get(program = program)
+        except MPR.DoesNotExist:
+            return None
+    
+    # def get_object(self):
+    #     try:
+    #         club_name = self.request.data.get('club_name')
+    #         club = Club.objects.get(name = club_name)
+    #         return club
+    #     except Club.DoesNotExist:
+    #         return None
+    
+    # def put(self, request, *args, **kwargs):
+    #     s = self.serializer_class(data=request.data)
+    #     s.is_valid(raise_exception=True)
+    #     valid = s.validated_data
+        
+    #     club = self.get_object()
+        
+    #     if club!=None:
+    #         data = self.serializer_class.objects.get(
+    #              = program_data.club.name
+    #         )
+    #         return Response({'data': data})
+        
+    #     return Response({'detail': _("There was a problem with adding a trainer.")}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class JoinToClubView(generics.GenericAPIView):

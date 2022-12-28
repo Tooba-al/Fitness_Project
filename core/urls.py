@@ -37,6 +37,7 @@ urlpatterns = [
     
     path('owner/list/', ShowOwnerListView.as_view()),
     path('club/list/', ShowClubListView.as_view()),
+    path('owner/mem-prog/list/<str:owner_username>/', MemberProgramShowToOnwer.as_view()),
     
     path('event/create/', AddToWalletView.as_view()),
     
