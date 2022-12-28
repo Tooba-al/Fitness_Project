@@ -226,6 +226,9 @@ class Event(models.Model):
     title = models.CharField(max_length=50)
     description = models.TextField(max_length=300)
     date = models.DateField(null = True, blank = True)
+    hour = models.IntegerField(null = True, blank = True)
+    minute = models.IntegerField(null = True, blank = True)
+    duration = models.IntegerField(null = True, blank = True)
     capacity = models.IntegerField(default=0)
     attachment = models.ImageField(upload_to=None, height_field=None, width_field=None, max_length=100, null = True, blank = True)
     
@@ -271,7 +274,9 @@ class EMR(models.Model):
     
 class Program(models.Model):
     name = models.CharField(max_length=50)
+    description = models.TextField(max_length=50, blank=True, null=True)
     price = models.IntegerField(default=0)
+    capacity = models.IntegerField(default=0)
     image = models.ImageField(upload_to=None, height_field=None, width_field=None, max_length=100, null = True, blank = True)
     # owner = models.ForeignKey(Owner, on_delete=models.CASCADE, related_name="program_owner")
     trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="program_trainer")
@@ -285,6 +290,26 @@ class MPR(models.Model):
     program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name="MPR_program")
     member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="MPR_member")
     is_finished = models.BooleanField(default=False)
+    
+    
+    
+class Diet(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField(max_length=50, blank=True, null=True)
+    price = models.IntegerField(default=0)
+    image = models.ImageField(upload_to=None, height_field=None, width_field=None, max_length=100, null = True, blank = True)
+    day = models.ImageField(upload_to=None, height_field=None, width_field=None, max_length=100, null = True, blank = True)
+    # owner = models.ForeignKey(Owner, on_delete=models.CASCADE, related_name="program_owner")
+    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="diet_trainer")
+    club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="diet_club")
+    
+    def __str__(self):
+        return (self.trainer.user_profile.username + "->" + self.name)
+    
+    
+# Diet-Member Relation
+class DMR(models.Model):
+    pass
     
     
     
