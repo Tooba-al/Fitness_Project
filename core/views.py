@@ -185,26 +185,55 @@ class OwnerSignUpView(generics.GenericAPIView):
 
 #         return Response({'detail': _("This profile already exists.")}, status=status.HTTP_400_BAD_REQUEST)
 
-class RetrieveUserProfileDataView(generics.RetrieveAPIView):
-    serializer_class = UserProfileDataSerializer
+# class RetrieveUserProfileDataView(generics.RetrieveAPIView):
+class RetrieveUserProfileDataView(generics.GenericAPIView):
+    serializer_class = UserDataSerializer
     # permission_classes = (IsAuthenticated,)
 
-    def get_object(self):
+    # def get_object(self):
+    #     try:
+    #         return self.request.user.user_profile
+    #     except UserProfile.DoesNotExist:
+    #         return None
+
+
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        print("username: ", username)
         try:
-            return self.request.user
-        except UserProfile.DoesNotExist:
-            return None
+            user_profile = UserProfile.objects.get(username = username)
+        except:
+            user_profile = None
+            
+        print(user_profile)
+        
+        if user_profile!=None:
+            data = UserProfileDataSerializer(instance = user_profile).data
+            # data = self.get_object()
+
+            return Response({'data:': data,})
+        return Response({'detail': _('Nothing to return.'),}, status=status.HTTP_404_NOT_FOUND)
 
 
-class RetrieveUserProfileEditView(generics.RetrieveUpdateAPIView):
+# class RetrieveUserProfileEditView(generics.RetrieveUpdateAPIView):
+class RetrieveUserProfileEditView(generics.GenericAPIView):
     serializer_class = UserProfileDataEditSerializer
     # permission_classes = (IsAuthenticated,)
 
     def get_object(self):
         try:
-            return self.request.user
+            return self.request.user.user_profile
         except UserProfile.DoesNotExist:
             return None
+
+    # def get_object(self):
+    #     try:
+    #         username = self.request.data.get('user_username')
+    #         user_profile = UserProfile.objects.get(user__username = username)
+    #         return user_profile
+    #     except UserProfile.DoesNotExist:
+    #         return None
+
 
 
 # class UserProfileAuthTokenView(generics.CreateAPIView):
@@ -691,6 +720,9 @@ class CreateProgramView(generics.GenericAPIView):
 class EnrollProgramView(generics.GenericAPIView):
     pass
 
+
+class MemberProgramShowToOnwer(generics.ListAPIView):
+    pass
 
 
 class JoinToClubView(generics.GenericAPIView):

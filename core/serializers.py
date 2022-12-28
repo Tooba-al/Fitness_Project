@@ -3,6 +3,7 @@ from .models import *
 from django.utils.translation import gettext as _
 
 class UserProfileDataSerializer(serializers.ModelSerializer):
+    # user_username = serializers.CharField(max_length=100)
     situation = serializers.SerializerMethodField()
 
     class Meta:
@@ -27,15 +28,35 @@ class UserProfileDataSerializer(serializers.ModelSerializer):
             return "Club Owner"
 
 
-class UserProfileDataEditSerializer(serializers.ModelSerializer):
+# class UserProfileDataEditSerializer(serializers.ModelSerializer):
+class UserProfileDataEditSerializer(serializers.Serializer):
+    user_username = serializers.CharField(max_length=100)
     class Meta:
         model = UserProfile
+    #     fields =  ['user_username', 'first_name', 'last_name', 'email']
         fields =  ['first_name', 'last_name', 'email']
         
-class UserDataSerializer(serializers.ModelSerializer):
+# class UserDataSerializer(serializers.ModelSerializer):
+class UserDataSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=100)
+    # class Meta:
+    #     model = UserProfile
+    #     fields =  ['user_username']
+        # fields =  ['user_username', 'username', 'password', 'first_name', 'last_name', 'email']
+        # fields =  ['username', 'password', 'first_name', 'last_name', 'email']
+    profile_data = serializers.SerializerMethodField()
+    
     class Meta:
         model = UserProfile
-        fields =  ['username', 'password', 'first_name', 'last_name', 'email']
+        fields = ['id', 'profile_data', 'username']
+        
+    def get_profile_data(self, instance):
+        _user_profile = instance.user
+        _profile_data = {}
+        _profile_data['username'] = _user_profile.username
+        _profile_data['first_name'] = _user_profile.first_name
+        _profile_data['last_name'] = _user_profile.last_name
+        return _profile_data
 
 
 class UserSignUpSerializer(serializers.ModelSerializer):
@@ -359,4 +380,7 @@ class EnrollProgramSerializer(serializers.Serializer):
 class JoinToClubSerializer(serializers.Serializer):
     member_username = serializers.CharField(max_length=32)
     club_name = serializers.CharField(max_length=32)
+    
+    
+
     
