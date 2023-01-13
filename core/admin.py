@@ -19,4 +19,8 @@ admin.site.register(MPR)        # Member-Program Relation
 admin.site.register(Diet)
 admin.site.register(DMR)        # Diet-Member Relation
 
+# Bounus Part
+admin.site.register(Education)
+admin.site.register(ETR)        # Education-Trainer Relation
+
 

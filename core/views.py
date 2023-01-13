@@ -994,3 +994,8 @@ class EnrollToDietView(generics.GenericAPIView):
         return Response({'detail': _("There was a problem with enrolling to diet.")}, status=status.HTTP_400_BAD_REQUEST)
         
         # return Response({'detail': _("You are not joint to this club.")})
+
+########################################
+########################################
+########################################
+

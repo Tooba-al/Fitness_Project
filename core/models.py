@@ -314,5 +314,24 @@ class DMR(models.Model):
     is_finished = models.BooleanField(default=False)
     
     
+###############################
+###############################
+###############################
+
+# Bounus Part
+
+class Education(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField(max_length=50, blank=True, null=True)
+    image = models.ImageField(upload_to=None, height_field=None, width_field=None, max_length=100, null = True, blank = True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="education_trainer")
+
+    def __str__(self):
+        return (self.trainer.user_profile.username + "->" + self.name)
     
-    
+
+# Education-Trainer Relation
+class ETR(models.Model):
+    education = models.ForeignKey(Education, on_delete=models.CASCADE, related_name="ETR_education") 
+    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="ETR_trainer") 
