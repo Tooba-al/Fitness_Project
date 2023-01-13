@@ -957,8 +957,40 @@ class EnrollToProgramView(generics.GenericAPIView):
                 is_finished = False
             )
             mpr.save()
-            return Response({'detail': _('Member enrolled to this club successfully')})
+            return Response({'detail': _('Member enrolled to this program successfully')})
         
-        return Response({'detail': _("There was a problem with enrolling to club.")}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': _("There was a problem with enrolling to program.")}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # return Response({'detail': _("You are not joint to this club.")})
+
+class EnrollToDietView(generics.GenericAPIView):
+    serializer_class = EnrollDietSerializer
+    
+    def get_object(self):
+        try:
+            diet = diet.objects.get(name = self.request.data.get('diet_name'))
+            return diet
+        except:
+            return None
+    
+    def put(self, request, *args, **kwargs):
+        s = self.serializer_class(data=request.data)
+        s.is_valid(raise_exception=True)
+        valid = s.validated_data
+        
+        diet = self.get_object()
+        member = Member.objects.get(user_profile__username=valid.get('member_username'))
+        mcr = MCR.objects.get(member = member, club__name = valid.get('club_name'))
+        # if mcr.member==member:
+        if diet!=None and mcr.member==member:
+            dmr = DMR.objects.create(
+                member = member,
+                diet = diet,
+                is_finished = False
+            )
+            dmr.save()
+            return Response({'detail': _('Member enrolled to this diet successfully')})
+        
+        return Response({'detail': _("There was a problem with enrolling to diet.")}, status=status.HTTP_400_BAD_REQUEST)
         
         # return Response({'detail': _("You are not joint to this club.")})

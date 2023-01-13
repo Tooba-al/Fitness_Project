@@ -40,7 +40,7 @@ urlpatterns = [
     path('member/list/', ShowMemberListView.as_view()),
     path('member/join/club/', JoinToClubView.as_view()),
     path('member/enroll/program/', EnrollToProgramView.as_view()),
-    # path('member/enroll/diet/', .as_view()),
+    path('member/enroll/diet/', EnrollToDietView.as_view()),
     
     path('owner/list/', ShowOwnerListView.as_view()),
     path('club/list/', ShowClubListView.as_view()),
@@ -53,11 +53,9 @@ urlpatterns = [
     
     path('program/create/', CreateProgramView.as_view()),
     path('program/list/', ProgramListView.as_view()),
-    # path('program/search/<str:program_name>/', ProgramSearchView.as_view()),
     
     path('diet/create/', CreateDietView.as_view()),
     path('diet/list/', DietListView.as_view()),
-    # path('diet/search/<str:diet_name>/', DietSearchView.as_view()),
     
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

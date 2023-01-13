@@ -441,6 +441,12 @@ class EnrollProgramSerializer(serializers.Serializer):
     club_name = serializers.CharField(max_length=32)
     
 
+class EnrollDietSerializer(serializers.Serializer):
+    member_username = serializers.CharField(max_length=32)
+    diet_name = serializers.CharField(max_length=32)
+    club_name = serializers.CharField(max_length=32)
+    
+
 class JoinToClubSerializer(serializers.Serializer):
     member_username = serializers.CharField(max_length=32)
     club_name = serializers.CharField(max_length=32)
