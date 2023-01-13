@@ -309,7 +309,10 @@ class Diet(models.Model):
     
 # Diet-Member Relation
 class DMR(models.Model):
-    pass
+    diet = models.ForeignKey(Diet, on_delete=models.CASCADE, related_name="DMR_diet")
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="DMR_member")
+    is_finished = models.BooleanField(default=False)
+    
     
     
     

@@ -399,6 +399,42 @@ class ProgramListSerializer(serializers.ModelSerializer):
 #         _program_data['club'] = _program.club.name
 #         return _program_data
 
+class DietSerializer(serializers.ModelSerializer):
+    trainer_username = serializers.CharField(max_length=32)
+    club_name = serializers.CharField(max_length=32)
+    class Meta:
+        model = Diet
+        fields = ['id', 'name', 'description', 'price', 
+                  'image', 'day', 'trainer_username', 'club_name']
+
+class DietistSerializer(serializers.ModelSerializer):
+    trainer_data = serializers.SerializerMethodField()
+    club_data = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Diet
+        fields = ['id', 'name', 'price', 'image', 'trainer_data', 'club_data']
+        # fields = ['name', 'price', 'image']
+        
+    def get_trainer_data(self, instance):
+        _user_profile = instance.trainer.user_profile
+        _trainer_data = {}
+        _trainer_data['first_name'] = _user_profile.first_name
+        _trainer_data['last_name'] = _user_profile.last_name
+        return _trainer_data
+    
+        
+    def get_club_data(self, instance):
+        _club = instance.club
+        _club_data = {}
+        _club_data['owner_first'] = _club.owner.user_profile.first_name
+        _club_data['owner_last'] = _club.owner.user_profile.last_name
+        _club_data['name'] = _club.name
+        _club_data['address'] = _club.address
+        return _club_data
+
+
+
 class EnrollProgramSerializer(serializers.Serializer):
     member_username = serializers.CharField(max_length=32)
     program_name = serializers.CharField(max_length=32)
@@ -411,4 +447,4 @@ class JoinToClubSerializer(serializers.Serializer):
     
     
 
-    
+  

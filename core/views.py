@@ -478,6 +478,13 @@ class ProgramListView(generics.ListAPIView):
     # filter_backends = [filters.OrderingFilter]
     # ordering_fields = ['name']
     
+class DietListView(generics.ListAPIView):
+    queryset = Diet.objects.all()
+    serializer_class = ProgramListSerializer
+    # permission_classes = [IsAuthenticated,]
+    # filter_backends = [filters.OrderingFilter]
+    # ordering_fields = ['name']
+    
 # class AddEventView(generics.CreateAPIView):
 #     serializer_class = CreateEventSerializer
 #     queryset = Event.objects.all()
@@ -620,6 +627,51 @@ class ProgramListView(generics.ListAPIView):
 #     # filter_backends = [filters.OrderingFilter]
 #     # ordering_fields = ['name']
 
+class MemberSearchView(generics.ListAPIView):
+    serializer_class = MemberSerializer
+    # permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        member_username = self.kwargs['member_username']
+
+        try:
+            # first = Member.objects.filter(user_profile__first_name__icontains = member_name)
+            # last = Member.objects.filter(user_profile__last_name__icontains = member_name)
+            # username = Member.objects.filter(user_profile__username__icontains = member_name)
+            return Member.objects.filter(user_profile__username__icontains = member_username)
+        except Member.DoesNotExist:
+            return None
+
+class TrainerSearchView(generics.ListAPIView):
+    serializer_class = TrainerSerializer
+    # permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        trainer_username = self.kwargs['trainer_username']
+
+        try:
+            # first = Member.objects.filter(user_profile__first_name__icontains = member_name)
+            # last = Member.objects.filter(user_profile__last_name__icontains = member_name)
+            # username = Member.objects.filter(user_profile__username__icontains = member_name)
+            return Trainer.objects.filter(user_profile__username__icontains = trainer_username)
+        except Trainer.DoesNotExist:
+            return None
+
+class OwnerSearchView(generics.ListAPIView):
+    serializer_class = OwnerSerializer
+    # permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        owner_username = self.kwargs['owner_username']
+
+        try:
+            # first = Member.objects.filter(user_profile__first_name__icontains = member_name)
+            # last = Member.objects.filter(user_profile__last_name__icontains = member_name)
+            # username = Member.objects.filter(user_profile__username__icontains = member_name)
+            return Owner.objects.filter(user_profile__username__icontains = owner_username)
+        except Owner.DoesNotExist:
+            return None
+
 class AddToWalletView(generics.RetrieveAPIView):
     queryset = Member.objects.all()
     serializer_class = AddToWalletSerializer
@@ -724,6 +776,18 @@ class CreateProgramView(generics.GenericAPIView):
         
         return Response({'detail': _("There was a problem with adding a program.")}, status=status.HTTP_400_BAD_REQUEST)
 
+class ProgramSearchView(generics.ListAPIView):
+    serializer_class = ProgramSerializer
+    # permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        program_name = self.kwargs['program_name']
+
+        try:
+            return Program.objects.filter(name__icontains = program_name)
+        except Program.DoesNotExist:
+            return None
+
 
 class MemberProgramShowToOnwer(generics.ListAPIView):
     # queryset = Program.objects.all()
@@ -762,6 +826,70 @@ class MemberProgramShowToOnwer(generics.ListAPIView):
         
     #     return Response({'detail': _("There was a problem with adding a trainer.")}, status=status.HTTP_400_BAD_REQUEST)
 
+
+
+class CreateDietView(generics.GenericAPIView):
+    serializer_class = ProgramSerializer
+    
+    def get_object(self):
+        try:
+            username = self.request.data.get('trainer_username')
+            trainer = Trainer.objects.get(user_profile__username = username)
+            return trainer
+        except UserProfile.DoesNotExist:
+            return None
+    
+    def put(self, request, *args, **kwargs):
+        s = self.serializer_class(data=request.data)
+        s.is_valid(raise_exception=True)
+        valid = s.validated_data
+        
+        trainer = self.get_object()
+        if trainer!=None:
+            owner = Owner.objects.get(user_profile__username=valid.get('owner_username'))
+            club = Club.objects.get(owner=owner, name=valid.get('club_name'))
+
+            diet = Diet.objects.create(
+                name = valid.get('name'),
+                description = valid.get('description'),
+                image = valid.get('image'),
+                price = valid.get('price'),
+                day = valid.get('day'),
+                trainer = trainer,
+                club = club,
+                # owner = owner,
+            )
+            diet.save()
+            return Response({'detail': _('Diet added successfully')})
+        
+        return Response({'detail': _("There was a problem with adding a diet.")}, status=status.HTTP_400_BAD_REQUEST)
+
+class DietSearchView(generics.ListAPIView):
+    serializer_class = DietSerializer
+    # permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        diet_name = self.kwargs['diet_name']
+
+        try:
+            return Diet.objects.filter(name__icontains = diet_name)
+        except Diet.DoesNotExist:
+            return None
+
+
+# class MemberDietShowToOnwer(generics.ListAPIView):
+#     # queryset = Diet.objects.all()
+#     serializer_class = ProgramSerializer
+    
+#     def get_object(self):
+#         try:
+#             club_name = Diet.objects.get(
+#                 owner__user_profile__username = self.kwargs['owner_username'])
+#             diet = Diet.objects.get(club__name = club_name)
+#             return DMR.objects.get(diet = diet)
+#         except DMR.DoesNotExist:
+#             return None
+    
 
 
 class JoinToClubView(generics.GenericAPIView):

@@ -16,5 +16,7 @@ admin.site.register(MCR)        # Member-Club Relation
 admin.site.register(EMR)        # Event-Members Relation
 admin.site.register(Program)
 admin.site.register(MPR)        # Member-Program Relation
+admin.site.register(Diet)
+admin.site.register(DMR)        # Diet-Member Relation
 
 
