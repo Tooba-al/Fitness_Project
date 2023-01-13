@@ -30,9 +30,12 @@ urlpatterns = [
     path('profile/edit/', RetrieveUserProfileEditView.as_view()),
     path('profile/add-to-wallet/', AddToWalletView.as_view()),
     
-    path('search/<str:owner_username>/', OwnerSearchView.as_view()),
-    path('search/<str:trainer_username>/', TrainerSearchView.as_view()),
-    path('search/<str:member_username>/', MemberSearchView.as_view()),
+    path('search/owner/<str:owner_username>/', OwnerSearchView.as_view()),
+    path('search/trainer/<str:trainer_username>/', TrainerSearchView.as_view()),
+    path('search/member/<str:member_username>/', MemberSearchView.as_view()),
+    path('search/program/<str:program_name>/', ProgramSearchView.as_view()),
+    path('search/diet/<str:diet_name>/', DietSearchView.as_view()),
+    path('search/club/<str:club_name>/', ClubSearchView.as_view()),
     
     path('member/list/', ShowMemberListView.as_view()),
     path('member/join/club/', JoinToClubView.as_view()),
@@ -50,11 +53,11 @@ urlpatterns = [
     
     path('program/create/', CreateProgramView.as_view()),
     path('program/list/', ProgramListView.as_view()),
-    path('program/search/<str:program_name>/', ProgramSearchView.as_view()),
+    # path('program/search/<str:program_name>/', ProgramSearchView.as_view()),
     
     path('diet/create/', CreateDietView.as_view()),
     path('diet/list/', DietListView.as_view()),
-    path('diet/search/<str:diet_name>/', DietSearchView.as_view()),
+    # path('diet/search/<str:diet_name>/', DietSearchView.as_view()),
     
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

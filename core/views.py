@@ -890,6 +890,17 @@ class DietSearchView(generics.ListAPIView):
 #         except DMR.DoesNotExist:
 #             return None
     
+class ClubSearchView(generics.ListAPIView):
+    serializer_class = ClubSerializer
+    # permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        club_name = self.kwargs['club_name']
+
+        try:
+            return Club.objects.filter(name__icontains = club_name)
+        except Club.DoesNotExist:
+            return None
 
 
 class JoinToClubView(generics.GenericAPIView):
