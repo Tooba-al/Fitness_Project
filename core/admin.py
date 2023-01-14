@@ -21,6 +21,6 @@ admin.site.register(DMR)        # Diet-Member Relation
 
 # Bounus Part
 admin.site.register(Education)
-admin.site.register(ETR)        # Education-Trainer Relation
+admin.site.register(EdMR)        # Education-Member Relation
 
 

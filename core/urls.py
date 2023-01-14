@@ -36,7 +36,9 @@ urlpatterns = [
     path('search/program/<str:program_name>/', ProgramSearchView.as_view()),
     path('search/diet/<str:diet_name>/', DietSearchView.as_view()),
     path('search/club/<str:club_name>/', ClubSearchView.as_view()),
+    path('search/education/<str:text>/', EducationSearchView.as_view()),
     
+    path('member/<str:memver_username>/', MemberView.as_view()),
     path('member/list/', ShowMemberListView.as_view()),
     path('member/join/club/', JoinToClubView.as_view()),
     path('member/enroll/program/', EnrollToProgramView.as_view()),
@@ -53,9 +55,18 @@ urlpatterns = [
     
     path('program/create/', CreateProgramView.as_view()),
     path('program/list/', ProgramListView.as_view()),
+    path('program/<int:program_id>/', ProgramView.as_view()),
     
     path('diet/create/', CreateDietView.as_view()),
     path('diet/list/', DietListView.as_view()),
+    path('diet/<int:diet_id>/', DietView.as_view()),
+    
+    path('education/create/', CreateEducationView.as_view()),
+    # path('education/delete/', DeleteEducationView.as_view()),
+    path('education/<int:education_id>/like/', EducationLikeView.as_view()),
+    path('education/<int:education_id>/dislike/', EducationDislikeView.as_view()),
+    path('education/feed-page/', FeedPageForEducationView.as_view()),
+    path('education/<int:education_id>/', EducationView.as_view()),
     
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

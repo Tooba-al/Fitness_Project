@@ -216,6 +216,7 @@ class Club(models.Model):
     # trainers = models.ManyToManyField(Trainer, related_name="trainers", blank=True)
     name = models.CharField(max_length=32)
     address = models.TextField(max_length=500)
+    enrollers = models.ManyToManyField(UserProfile, related_name="enrollers", blank=True)
     # phone_number = models.CharField(max_length=12)
     def __str__(self):
         return (self.owner.user_profile.username + " -> " + self.name)
@@ -320,18 +321,43 @@ class DMR(models.Model):
 
 # Bounus Part
 
-class Education(models.Model):
-    name = models.CharField(max_length=50)
-    description = models.TextField(max_length=50, blank=True, null=True)
-    image = models.ImageField(upload_to=None, height_field=None, width_field=None, max_length=100, null = True, blank = True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="education_trainer")
+# class Education(models.Model):
+#     name = models.CharField(max_length=50)
+#     description = models.TextField(max_length=50, blank=True, null=True)
+#     image = models.ImageField(upload_to=None, height_field=None, width_field=None, max_length=100, null = True, blank = True)
+#     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return (self.trainer.user_profile.username + "->" + self.name)
+#     def __str__(self):
+#         return (self.trainer.user_profile.username + "->" + self.name)
     
 
 # Education-Trainer Relation
-class ETR(models.Model):
-    education = models.ForeignKey(Education, on_delete=models.CASCADE, related_name="ETR_education") 
-    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="ETR_trainer") 
+# class ETR(models.Model):
+#     education = models.ForeignKey(Education, on_delete=models.CASCADE, related_name="ETR_education") 
+#     trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="ETR_trainer") 
+
+
+class Education(models.Model):
+    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="educations", default = None)
+    name = models.CharField(max_length=100, null=True)
+    text = models.TextField(blank=True, null=True)
+    image = models.ImageField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def likes_count(self):
+        return EMR.objects.filter(education = self, isLiked = True).count()
+
+    def is_liked(self, member):
+        try:
+            if EMR.objects.get(member = member, education = self, isLiked = True):
+                return True
+        except:
+            return False
+
+
+class EdMR(models.Model):
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="EdMR_member")
+    education = models.ForeignKey(Education, on_delete=models.CASCADE, related_name="EdMR_education")
+    isLiked = models.BooleanField(default = False)
+    created_at = models.DateTimeField(auto_now_add=True)

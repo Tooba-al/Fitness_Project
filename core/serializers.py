@@ -168,6 +168,39 @@ class TrainerSerializer(serializers.ModelSerializer):
         _profile_data['last_name'] = _user_profile.last_name
         return _profile_data
    
+   
+class MemberListSerializer(serializers.ModelSerializer):
+    profile_data = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Member
+        fields = ['id', 'profile_data']
+        
+    def get_profile_data(self, instance):
+        _user_profile = instance.user_profile
+        _profile_data = {}
+        _profile_data['username'] = _user_profile.username
+        _profile_data['first_name'] = _user_profile.first_name
+        _profile_data['last_name'] = _user_profile.last_name
+        _profile_data['weight'] = _user_profile.weight
+        _profile_data['height'] = _user_profile.height
+        _profile_data['sex'] = _user_profile.sex
+        _profile_data['wallet'] = _user_profile.wallet
+   
+class TrainerListSerializer(serializers.ModelSerializer):
+    profile_data = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Trainer
+        fields = ['id', 'profile_data']
+        
+    def get_profile_data(self, instance):
+        _user_profile = instance.user_profile
+        _profile_data = {}
+        _profile_data['username'] = _user_profile.username
+        _profile_data['first_name'] = _user_profile.first_name
+        _profile_data['last_name'] = _user_profile.last_name
+
      
 # class EventSerializer(serializers.ModelSerializer):
 #     owner_data = serializers.SerializerMethodField()
@@ -453,4 +486,41 @@ class JoinToClubSerializer(serializers.Serializer):
     
     
 
-  
+###############################
+###############################
+###############################
+
+# Bounus Part
+
+
+class EducationSerializer(serializers.ModelSerializer):
+    is_liked = serializers.SerializerMethodField()
+    trainer_data = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Education
+        fields = ['id', 'trainer_data','name', 'text', 'image', 'created_at', 
+                  'likes_count', 'is_liked']
+        read_only_fields = ['trainer']
+        
+
+    def get_is_liked(self,instance):
+        request = self.context.get('request',None)
+        _user_profile = request.user.user_profile
+        return instance.is_liked(_user_profile)
+
+    def get_trainer_data(self, instance):
+        _care_giver = instance.care_giver
+        return TrainerListSerializer(instance = _care_giver).data
+
+class EducationCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Education
+        fields = ['id', 'trainer', 'name', 'text', 'image', 'created_at']
+        read_only_fields = ['trainer']
+
+class EdMRSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EdMR
+        #fields = ['user_profile', 'education', 'isUsefull','isLiked','isSaved','created_at']
+        fields = []

@@ -449,6 +449,12 @@ class ShowMemberListView(generics.ListAPIView):
     # permission_classes = [IsAuthenticated,]
     # filter_backends = [filters.OrderingFilter]
     # ordering_fields = ['id']
+    
+class MemberView(generics.RetrieveAPIView):
+    queryset = Member.objects.all()
+    serializer_class = MemberSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'member_username'
 
 class ShowOwnerListView(generics.ListAPIView):
     queryset = Owner.objects.all()
@@ -478,12 +484,24 @@ class ProgramListView(generics.ListAPIView):
     # filter_backends = [filters.OrderingFilter]
     # ordering_fields = ['name']
     
+class ProgramView(generics.RetrieveAPIView):
+    queryset = Program.objects.all()
+    serializer_class = ProgramSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'program_id'
+    
 class DietListView(generics.ListAPIView):
     queryset = Diet.objects.all()
     serializer_class = ProgramListSerializer
     # permission_classes = [IsAuthenticated,]
     # filter_backends = [filters.OrderingFilter]
     # ordering_fields = ['name']
+    
+class DietView(generics.RetrieveAPIView):
+    queryset = Diet.objects.all()
+    serializer_class = DietSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'diet_id'
     
 # class AddEventView(generics.CreateAPIView):
 #     serializer_class = CreateEventSerializer
@@ -999,3 +1017,103 @@ class EnrollToDietView(generics.GenericAPIView):
 ########################################
 ########################################
 
+# Bonus Part
+
+class CreateEducationView(generics.CreateAPIView):
+    serializer_class = EducationCreateSerializer
+    queryset = Education.objects.all()
+
+    def perform_create(self, serializer):
+        with transaction.atomic():
+            education = serializer.save(trainer=self.request.user.user_profile.trainer)
+            education.save()
+
+class EducationView(generics.RetrieveAPIView):
+    queryset = Education.objects.all()
+    serializer_class = EducationSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'education_id'
+    # permission_classes = [IsAuthenticated,]
+
+# class DeleteEducationView(generics.GenericAPIView):
+#     pass
+
+class FeedPageForEducationView(generics.ListAPIView):
+    pass
+
+
+class EducationLikeView(generics.CreateAPIView):
+    serializer_class = EdMRSerializer
+
+    def post(self, request, *args, **kwargs):
+        s = self.serializer_class(data=request.data)
+        s.is_valid(raise_exception=True)
+
+        try:
+            with transaction.atomic():
+                valid = s.validated_data
+                member = self.request.user.user_profile
+                education_id = self.kwargs['education_id']
+                education =  Education.objects.get(id = education_id)
+
+                emr = EdMR.objects.get_or_create(
+                    education = education,
+                    member = member,
+                )
+                emr[0].isLiked = True
+                emr[0].save()
+                return Response({'detail': _("You liked the education.")}, status=status.HTTP_200_OK)
+        except:
+            return Response({'detail': _("There was a problem with liking the education.")}, status=status.HTTP_400_BAD_REQUEST)
+
+class EducationDislikeView(generics.UpdateAPIView):
+    serializer_class = EdMRSerializer
+
+    def post(self, request, *args, **kwargs):
+        s = self.serializer_class(data=request.data)
+        s.is_valid(raise_exception=True)
+
+        try:
+            with transaction.atomic():
+                valid = s.validated_data
+                member = self.request.user.user_profile
+                education_id = self.kwargs['education_id']
+                education =  Education.objects.get(id = education_id)
+
+                emr = EdMR.objects.get(
+                    education = education,
+                    member = member,
+                )
+
+                emr.isLiked = False
+                emr.save()
+                if(emr.isLiked == False):
+                    emr.delete()
+
+                return Response({'detail': _("You disliked the education.")}, status=status.HTTP_200_OK)
+        except:
+            return Response({'detail': _("There was a problem with disliking the education.")}, status=status.HTTP_400_BAD_REQUEST)
+
+# class FeedPageView(generics.ListAPIView):
+#     serializer_class = EducationSerializer
+#     ordering_fields = ['likes_count', 'created_at']
+
+#     def get_queryset(self):
+#         try:
+#             user = self.request.user.user_profile
+#             enrollers = user.enrollers.all()
+#             return Education.objects.filter(trainer__in = enrollers)
+#         except Education.DoesNotExist:
+#             return None
+
+class EducationSearchView(generics.ListAPIView):
+    serializer_class = EducationSerializer
+    # permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        text = self.kwargs['text']
+
+        try:
+            return Education.objects.filter(text__icontains = text)
+        except Education.DoesNotExist:
+            return None
