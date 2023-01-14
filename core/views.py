@@ -478,6 +478,19 @@ class CreateEventView(generics.GenericAPIView):
 
         return Response({'detail': _("This profile already exists.")}, status=status.HTTP_400_BAD_REQUEST)     
 
+class DeleteEventView(generics.DestroyAPIView):
+    def delete(self, request, *args, **kwargs):
+
+        try:
+            with transaction.atomic():
+                event_id = self.kwargs['event_id']
+                event = Event.objects.get(id = event_id)
+                event.delete()
+                return Response({'detail': _("Event deleted.")}, status=status.HTTP_200_OK)
+
+        except Event.DoesNotExist:
+            return Response({'detail': _("This event doesn't exist.")}, status=status.HTTP_400_BAD_REQUEST)
+
 class RejisterEventView(generics.GenericAPIView):
     serializer_class = EMRSerializer
 
@@ -666,6 +679,19 @@ class CreateProgramView(generics.GenericAPIView):
         
         return Response({'detail': _("There was a problem with adding a program.")}, status=status.HTTP_400_BAD_REQUEST)
 
+class DeleteProgramView(generics.DestroyAPIView):
+    def delete(self, request, *args, **kwargs):
+
+        try:
+            with transaction.atomic():
+                program_id = self.kwargs['program_id']
+                program = Program.objects.get(id = program_id)
+                program.delete()
+                return Response({'detail': _("Program deleted.")}, status=status.HTTP_200_OK)
+
+        except Program.DoesNotExist:
+            return Response({'detail': _("This program doesn't exist.")}, status=status.HTTP_400_BAD_REQUEST)
+
 class ProgramSearchView(generics.ListAPIView):
     serializer_class = ProgramSerializer
 
@@ -724,6 +750,19 @@ class CreateDietView(generics.GenericAPIView):
             return Response({'detail': _('Diet added successfully')})
         
         return Response({'detail': _("There was a problem with adding a diet.")}, status=status.HTTP_400_BAD_REQUEST)
+
+class DeleteDietView(generics.DestroyAPIView):
+    def delete(self, request, *args, **kwargs):
+
+        try:
+            with transaction.atomic():
+                diet_id = self.kwargs['diet_id']
+                diet = Diet.objects.get(id = diet_id)
+                diet.delete()
+                return Response({'detail': _("Diet deleted.")}, status=status.HTTP_200_OK)
+
+        except Diet.DoesNotExist:
+            return Response({'detail': _("This diet doesn't exist.")}, status=status.HTTP_400_BAD_REQUEST)
 
 class DietSearchView(generics.ListAPIView):
     serializer_class = DietSerializer
@@ -868,8 +907,18 @@ class EducationView(generics.RetrieveAPIView):
     lookup_field = 'id'
     lookup_url_kwarg = 'education_id'
 
-class DeleteEducationView(generics.GenericAPIView):
-    pass
+class DeleteEducationView(generics.DestroyAPIView):
+    def delete(self, request, *args, **kwargs):
+
+        try:
+            with transaction.atomic():
+                education_id = self.kwargs['education_id']
+                education = Education.objects.get(id = education_id)
+                education.delete()
+                return Response({'detail': _("Education deleted.")}, status=status.HTTP_200_OK)
+
+        except Education.DoesNotExist:
+            return Response({'detail': _("This Education doesn't exist.")}, status=status.HTTP_400_BAD_REQUEST)
 
 class FeedPageForEducationView(generics.ListAPIView):
     pass

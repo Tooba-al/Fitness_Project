@@ -49,6 +49,7 @@ urlpatterns = [
     path('owner/mem-prog/list/<str:owner_username>/', MemberProgramShowToOnwer.as_view()),
     
     path('event/create/', CreateEventView.as_view()),
+    path('event/<int:event_id>/delete/', DeleteEventView.as_view()),
     path('event/<int:request_id>/register/', RejisterEventView.as_view()),
     path('event/<int:request_id>/unregister/', UnrejisterEventView.as_view()),
     path('event/list/', ShowEventListView.as_view()),
@@ -57,15 +58,17 @@ urlpatterns = [
     path('trainer/add/', AddTrainerView.as_view()),
     
     path('program/create/', CreateProgramView.as_view()),
+    path('program/<int:program_id>/delete/', DeleteProgramView.as_view()),
     path('program/list/', ProgramListView.as_view()),
     path('program/<int:program_id>/', ProgramView.as_view()),
     
     path('diet/create/', CreateDietView.as_view()),
+    path('diet/<int:diet_id>/delete/', DeleteDietView.as_view()),
     path('diet/list/', DietListView.as_view()),
     path('diet/<int:diet_id>/', DietView.as_view()),
     
     path('education/create/', CreateEducationView.as_view()),
-    # path('education/delete/', DeleteEducationView.as_view()),
+    path('education/<int:education_id>/delete/', DeleteEducationView.as_view()),
     path('education/<int:education_id>/like/', EducationLikeView.as_view()),
     path('education/<int:education_id>/dislike/', EducationDislikeView.as_view()),
     path('education/feed-page/', FeedPageForEducationView.as_view()),
