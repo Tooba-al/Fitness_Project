@@ -61,8 +61,8 @@ class UserSignUpView(generics.GenericAPIView):
 
         return Response({'detail': _("This profile already exists.")}, status=status.HTTP_400_BAD_REQUEST)
       
-
 class OwnerSignUpView(generics.GenericAPIView):
+    
     """
         Send verification code
         if send failed respond with wait time
@@ -125,71 +125,8 @@ class OwnerSignUpView(generics.GenericAPIView):
             #     return Response({'detail': _("Problem with signing up")}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'detail': _("This profile already exists.")}, status=status.HTTP_400_BAD_REQUEST)
-
-# class TrainerSignUpView(generics.GenericAPIView):
-#     """
-#         Send verification code
-#         if send failed respond with wait time
-#     """
-
-#     serializer_class = TrainerSignUpSerializer
-
-#     def get_object(self):
-#         email = self.request.data.get('email')
-#         username = self.request.data.get('username')
-
-#         try:
-#             return UserProfile.objects.get_if_available(username, email)
-#         except UserProfile.DoesNotExist:
-#             return None
-
-#     def post(self, request, *args, **kwargs):
-#         s = self.serializer_class(data=request.data)
-#         s.is_valid(raise_exception=True)
-
-#         user_profile = self.get_object()
-
-#         if not user_profile:
-#             try:
-#                 with transaction.atomic():
-#                     valid = s.validated_data
-#                     hash = make_password(valid.get("password"))
-#                     user_profile = UserProfile.objects.create(username = valid.get('username'),
-#                                                             password = hash,
-#                                                             club_name = valid.get('club_name'),
-#                                                             email = valid.get('email'),
-#                                                             first_name = valid.get('first_name'),
-#                                                             last_name = valid.get('last_name'),                                                
-#                                                             user=User.objects.create(
-#                                                             username=s.validated_data.get('username')))
-#                     owner = Owner.objects.create(
-#                         user_profile = user_profile,
-#                     )
-#                     #wallet = Wallet.objects.create(owner = user_profile)
-#                     #user_profile.wallet = wallet
-#                     user_profile.save()
-#                     owner.save()
-
-#                     upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
-
-#                     if upv['status'] != 201:
-#                         return Response({'detail': _("Code not sent"), 'wait': upv['wait']}, status=upv['status'])
-
-#                     if settings.DEBUG:
-#                         return Response({'detail': _("Code sent"), 'code': upv['code']})
-
-#                     return Response({'detail': _("Code sent")})
-
-#             except:
-#                 return Response({'detail': _("Problem with signing up")}, status=status.HTTP_400_BAD_REQUEST)
-
-#         return Response({'detail': _("This profile already exists.")}, status=status.HTTP_400_BAD_REQUEST)
-
 class RetrieveUserProfileDataView(generics.RetrieveAPIView):
-# class RetrieveUserProfileDataView(generics.GenericAPIView):
-    # serializer_class = UserDataSerializer
     serializer_class = UserProfileDataSerializer
-    # permission_classes = (IsAuthenticated,)
 
     def get_object(self):
         try:
@@ -199,25 +136,6 @@ class RetrieveUserProfileDataView(generics.RetrieveAPIView):
             return (self.request.user)
         except UserProfile.DoesNotExist:
             return None
-
-
-    # def post(self, request, *args, **kwargs):
-    #     username = request.data.get('username')
-    #     print("username: ", username)
-    #     try:
-    #         user_profile = UserProfile.objects.get(username = username)
-    #     except:
-    #         user_profile = None
-            
-    #     print(user_profile)
-        
-    #     if user_profile!=None:
-    #         data = UserProfileDataSerializer(instance = user_profile).data
-    #         # data = self.get_object()
-
-    #         return Response({'data:': data,})
-    #     return Response({'detail': _('Nothing to return.'),}, status=status.HTTP_404_NOT_FOUND)
-
 
 class RetrieveUserProfileEditView(generics.RetrieveUpdateAPIView):
 # class RetrieveUserProfileEditView(generics.GenericAPIView):
@@ -233,16 +151,6 @@ class RetrieveUserProfileEditView(generics.RetrieveUpdateAPIView):
             return (self.request.user)
         except UserProfile.DoesNotExist:
             return None
-
-    # def get_object(self):
-    #     try:
-    #         username = self.request.data.get('user_username')
-    #         user_profile = UserProfile.objects.get(user__username = username)
-    #         return user_profile
-    #     except UserProfile.DoesNotExist:
-    #         return None
-
-
 
 # class UserProfileAuthTokenView(generics.CreateAPIView):
 #     """
@@ -315,9 +223,6 @@ class LoginView(generics.GenericAPIView):
             return Response({'data': data,})
         else:
             return Response({'detail': _('Wrong password'),}, status=status.HTTP_404_NOT_FOUND)
-        # except:
-        #     return Response({'detail': _('You may not be verified yet.'),}, status=status.HTTP_404_NOT_FOUND)
-
 
 class ForgetPasswordView(generics.CreateAPIView):
 
@@ -377,7 +282,6 @@ class ChangePasswordView(generics.UpdateAPIView):
 
         except ForgetPasswordLink.DoesNotExist:
             return Response({'detail': _("This link isn't valid.")}, status=status.HTTP_400_BAD_REQUEST)
-
 
 # class ChangePasswordView(generics.UpdateAPIView):
 
@@ -446,9 +350,6 @@ class ResendVerificationCodeView(generics.CreateAPIView):
 class ShowMemberListView(generics.ListAPIView):
     queryset = Member.objects.all()
     serializer_class = MemberSerializer
-    # permission_classes = [IsAuthenticated,]
-    # filter_backends = [filters.OrderingFilter]
-    # ordering_fields = ['id']
     
 class MemberView(generics.RetrieveAPIView):
     queryset = Member.objects.all()
@@ -459,30 +360,25 @@ class MemberView(generics.RetrieveAPIView):
 class ShowOwnerListView(generics.ListAPIView):
     queryset = Owner.objects.all()
     serializer_class = OwnerSerializer
-    # permission_classes = [IsAuthenticated,]
-    # filter_backends = [filters.OrderingFilter]
-    # ordering_fields = ['name']
 
 class ShowTrainerListView(generics.ListAPIView):
     queryset = Trainer.objects.all()
     serializer_class = TrainerSerializer
-    # permission_classes = [IsAuthenticated,]
-    # filter_backends = [filters.OrderingFilter]
-    # ordering_fields = ['name']
 
 class ShowClubListView(generics.ListAPIView):
     queryset = Club.objects.all()
     serializer_class = ClubSerializer
-    # permission_classes = [IsAuthenticated,]
-    # filter_backends = [filters.OrderingFilter]
     ordering_fields = ['name']
     
 class ProgramListView(generics.ListAPIView):
     queryset = Program.objects.all()
     serializer_class = ProgramListSerializer
-    # permission_classes = [IsAuthenticated,]
-    # filter_backends = [filters.OrderingFilter]
-    # ordering_fields = ['name']
+
+class EventView(generics.RetrieveAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'event_id'
     
 class ProgramView(generics.RetrieveAPIView):
     queryset = Program.objects.all()
@@ -493,9 +389,6 @@ class ProgramView(generics.RetrieveAPIView):
 class DietListView(generics.ListAPIView):
     queryset = Diet.objects.all()
     serializer_class = ProgramListSerializer
-    # permission_classes = [IsAuthenticated,]
-    # filter_backends = [filters.OrderingFilter]
-    # ordering_fields = ['name']
     
 class DietView(generics.RetrieveAPIView):
     queryset = Diet.objects.all()
@@ -504,146 +397,130 @@ class DietView(generics.RetrieveAPIView):
     lookup_url_kwarg = 'diet_id'
     
 # class AddEventView(generics.CreateAPIView):
-#     serializer_class = CreateEventSerializer
-#     queryset = Event.objects.all()
-#     # permission_classes = [IsOwner,]
-
-#     def perform_create(self, serializer):
-#         with transaction.atomic():
-#             event = serializer.save(care_giver=self.request.user.user_profile.owner)
-#             event.save()
-
-# class CreateEventView(generics.GenericAPIView):
-#     serializer_class = CreateEventSerializer
-
-#     def get_object(self):
-#         username = self.request.data.get('username')
-
-#         try:
-#             return UserProfile.objects.get(username=username)
-#         except UserProfile.DoesNotExist:
-#             return None
-
-#     def post(self, request, *args, **kwargs):
-#         s = self.serializer_class(data=request.data)
-#         s.is_valid(raise_exception=True)
-
-#         user_profile = self.get_object()
-
-#         if not user_profile:
-#             try:
-#                 with transaction.atomic():
-#                     valid = s.validated_data
-#                     # hash = make_password(valid.get("password"))
-#                     user_profile = UserProfile.objects.create(username = valid.get('username'),
-#                                                         # password = hash,
-#                                                         password = valid.get('password'),
-#                                                         user=User.objects.create(
-#                                                             username=s.validated_data.get('username')))
-                    
-#                     user_profile.save()
-#                     owner = Owner.objects.get()
-#                     # user_profile.save(using='secondary')
-#                     event = Event.objects.create(
-#                             user = user_profile,
-#                             ap = 100,  
-#                             coins = 100,  
-#                             has_disaster = False,  
-#                     )
-#                     group.save()
-#                     initial_cat = ["Primary", "Primary", "Primary", "Secondary", "Secondary", "Secondary", "Secondary"]
-#                     initial_name = ["Water", "Food", "Fuel", "Iron", "Copper", "Gold", "Diamond"]
-#                     initial_val = [0.1, 0.1, 0.1, 1, 2, 5, 13]
-#                     for index in range(6):
-#                         resource = Resource.objects.create(
-#                                 name = initial_name[index],
-#                                 amount = initial_val[index],
-#                                 price = 0,
-#                                 category = initial_cat[index],
-#                         )
-#                         resource.save()
-#                         rgr = RGR.objects.create(
-#                             group = group,
-#                             resource = resource,
-#                         )
-#                         rgr.save()
-#                     ini_name = ["Power", "Wealth", "Fame"]
-#                     for index in range(3):
-#                         point = Point.objects.create(
-#                                 name = ini_name[index],
-#                                 amount = 10,
-#                         )
-#                         point.save()
-#                         pgr = PGR.objects.create(
-#                             group = group,
-#                             point = point,
-#                         )
-#                         pgr.save()
-#                     # group.save(using='secondary')
-#                     return Response({'detail': _("Group successfully added")})
-#             except:
-#                 return Response({'detail': _("Problem with signing up")}, status=status.HTTP_400_BAD_REQUEST)
-
-#         return Response({'detail': _("This profile already exists.")}, status=status.HTTP_400_BAD_REQUEST)
-        
-
-# class RejisterEventView(generics.GenericAPIView):
-#     serializer_class = EMRSerializer
-#     # permission_classes = [IsMember,]
-
-#     def put(self, request, *args, **kwargs):
-#         user_request_data = self.serializer_class(data=request.data)
-#         user_request_data.is_valid(raise_exception=True)
+    serializer_class = CreateEventSerializer
+    queryset = Event.objects.all()
     
-#         try:
-#             with transaction.atomic():
-#                 member = self.request.user.user_profile.member
-#                 event_id = self.kwargs['request_id']
-#                 event = Event.objects.get(id = event_id)
-#                 emr = EMR.objects.get(event = event, member = member)
-#                 emr.isRegistered = True
-#                 emr.save()
+    def perform_create(self, serializer):
+        with transaction.atomic():
+            event = serializer.save(care_giver=self.request.user.user_profile.owner)
+            event.save()
+
+class CreateEventView(generics.GenericAPIView):
+    serializer_class = CreateEventSerializer
+
+    def get_object(self):
+        username = self.request.data.get('username')
+
+        try:
+            return UserProfile.objects.get(username=username)
+        except UserProfile.DoesNotExist:
+            return None
+
+    def post(self, request, *args, **kwargs):
+        s = self.serializer_class(data=request.data)
+        s.is_valid(raise_exception=True)
+
+        user_profile = self.get_object()
+
+        if not user_profile:
+            try:
+                with transaction.atomic():
+                    valid = s.validated_data
+                    # hash = make_password(valid.get("password"))
+                    user_profile = UserProfile.objects.create(username = valid.get('username'),
+                                                        # password = hash,
+                                                        password = valid.get('password'),
+                                                        user=User.objects.create(
+                                                            username=s.validated_data.get('username')))
                     
-#                 return Response({'detail': _("You registered to this event.")}, status=status.HTTP_200_OK)
-#         except:
-#             return Response({'detail': _("There was a problem with registering to this event.")}, status=status.HTTP_400_BAD_REQUEST)
+                    user_profile.save()
+                    owner = Owner.objects.get()
+                    # user_profile.save(using='secondary')
+                    event = Event.objects.create(
+                            user = user_profile,
+                            ap = 100,  
+                            coins = 100,  
+                            has_disaster = False,  
+                    )
+                    group.save()
+                    initial_cat = ["Primary", "Primary", "Primary", "Secondary", "Secondary", "Secondary", "Secondary"]
+                    initial_name = ["Water", "Food", "Fuel", "Iron", "Copper", "Gold", "Diamond"]
+                    initial_val = [0.1, 0.1, 0.1, 1, 2, 5, 13]
+                    for index in range(6):
+                        resource = Resource.objects.create(
+                                name = initial_name[index],
+                                amount = initial_val[index],
+                                price = 0,
+                                category = initial_cat[index],
+                        )
+                        resource.save()
+                        rgr = RGR.objects.create(
+                            group = group,
+                            resource = resource,
+                        )
+                        rgr.save()
+                    ini_name = ["Power", "Wealth", "Fame"]
+                    for index in range(3):
+                        point = Point.objects.create(
+                                name = ini_name[index],
+                                amount = 10,
+                        )
+                        point.save()
+                        pgr = PGR.objects.create(
+                            group = group,
+                            point = point,
+                        )
+                        pgr.save()
+                    # group.save(using='secondary')
+                    return Response({'detail': _("Group successfully added")})
+            except:
+                return Response({'detail': _("Problem with signing up")}, status=status.HTTP_400_BAD_REQUEST)
 
+        return Response({'detail': _("This profile already exists.")}, status=status.HTTP_400_BAD_REQUEST)     
 
-# class UnrejisterEventRequestView(generics.GenericAPIView):
-#     serializer_class = EMRSerializer
-#     # permission_classes = [IsMember,]
+class RejisterEventView(generics.GenericAPIView):
+    serializer_class = EMRSerializer
 
-#     def put(self, request, *args, **kwargs):
-#         user_request_data = self.serializer_class(data=request.data)
-#         user_request_data.is_valid(raise_exception=True)
-        
-#         try:
-#             with transaction.atomic():
-#                 member = self.request.user.user_profile.member
-#                 event_id = self.kwargs['request_id']
-#                 event = Event.objects.get(id = event_id)
-#                 emr = EMR.objects.get(event = event, member = member)
-#                 emr.isRegistered = False
-#                 emr.save()
-                    
-#                 return Response({'detail': _("You registered to this event.")}, status=status.HTTP_200_OK)
-#         except:
-#             return Response({'detail': _("There was a problem with registering to this event.")}, status=status.HTTP_400_BAD_REQUEST)
-
+    def put(self, request, *args, **kwargs):
+        user_request_data = self.serializer_class(data=request.data)
+        user_request_data.is_valid(raise_exception=True)
     
-# class EventView(generics.RetrieveAPIView):
-#     queryset = Event.objects.all()
-#     serializer_class = EventSerializer
-#     lookup_field = 'id'
-#     lookup_url_kwarg = 'event_id'
-#     # permission_classes = [IsAuthenticated,]
+        try:
+            with transaction.atomic():
+                member = self.request.user.user_profile.member
+                event_id = self.kwargs['request_id']
+                event = Event.objects.get(id = event_id)
+                emr = EMR.objects.get(event = event, member = member)
+                emr.isRegistered = True
+                emr.save()
+                    
+                return Response({'detail': _("You registered to this event.")}, status=status.HTTP_200_OK)
+        except:
+            return Response({'detail': _("There was a problem with registering to this event.")}, status=status.HTTP_400_BAD_REQUEST)
 
-# class ShowEventListView(generics.ListAPIView):
-#     queryset = Event.objects.all()
-#     serializer_class = EventSerializer
-#     # permission_classes = [IsAuthenticated,]
-#     # filter_backends = [filters.OrderingFilter]
-#     # ordering_fields = ['name']
+class UnrejisterEventView(generics.GenericAPIView):
+    serializer_class = EMRSerializer
+
+    def put(self, request, *args, **kwargs):
+        user_request_data = self.serializer_class(data=request.data)
+        user_request_data.is_valid(raise_exception=True)
+        
+        try:
+            with transaction.atomic():
+                member = self.request.user.user_profile.member
+                event_id = self.kwargs['request_id']
+                event = Event.objects.get(id = event_id)
+                emr = EMR.objects.get(event = event, member = member)
+                emr.isRegistered = False
+                emr.save()
+                    
+                return Response({'detail': _("You registered to this event.")}, status=status.HTTP_200_OK)
+        except:
+            return Response({'detail': _("There was a problem with registering to this event.")}, status=status.HTTP_400_BAD_REQUEST)
+
+class ShowEventListView(generics.ListAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
 
 class MemberSearchView(generics.ListAPIView):
     serializer_class = MemberSerializer
@@ -722,11 +599,7 @@ class AddToWalletView(generics.RetrieveAPIView):
             return Response({'detail': _("There was a problem with updating your wallet.")}, status=status.HTTP_400_BAD_REQUEST)
 
 class AddTrainerView(generics.GenericAPIView):
-    # queryset = Owner.objects.all()
-    # lookup_field = 'id'
-    # lookup_url_kwarg = 'owner_username'
     serializer_class = AddTrainerSerializer
-    # permission_classes = (IsAuthenticated,)
     
     def get_object(self):
         try:
@@ -758,7 +631,6 @@ class AddTrainerView(generics.GenericAPIView):
             return Response({'detail': _('Trainer added successfully')})
         
         return Response({'detail': _("There was a problem with adding a trainer.")}, status=status.HTTP_400_BAD_REQUEST)
-
 
 class CreateProgramView(generics.GenericAPIView):
     serializer_class = ProgramSerializer
@@ -796,7 +668,6 @@ class CreateProgramView(generics.GenericAPIView):
 
 class ProgramSearchView(generics.ListAPIView):
     serializer_class = ProgramSerializer
-    # permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         program_name = self.kwargs['program_name']
@@ -806,10 +677,7 @@ class ProgramSearchView(generics.ListAPIView):
         except Program.DoesNotExist:
             return None
 
-
 class MemberProgramShowToOnwer(generics.ListAPIView):
-    # queryset = Program.objects.all()
-    # serializer_class = MemberProgramShowToOwnerSerializer
     serializer_class = ProgramSerializer
     
     def get_object(self):
@@ -820,31 +688,6 @@ class MemberProgramShowToOnwer(generics.ListAPIView):
             return MPR.objects.get(program = program)
         except MPR.DoesNotExist:
             return None
-    
-    # def get_object(self):
-    #     try:
-    #         club_name = self.request.data.get('club_name')
-    #         club = Club.objects.get(name = club_name)
-    #         return club
-    #     except Club.DoesNotExist:
-    #         return None
-    
-    # def put(self, request, *args, **kwargs):
-    #     s = self.serializer_class(data=request.data)
-    #     s.is_valid(raise_exception=True)
-    #     valid = s.validated_data
-        
-    #     club = self.get_object()
-        
-    #     if club!=None:
-    #         data = self.serializer_class.objects.get(
-    #              = program_data.club.name
-    #         )
-    #         return Response({'data': data})
-        
-    #     return Response({'detail': _("There was a problem with adding a trainer.")}, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 class CreateDietView(generics.GenericAPIView):
     serializer_class = ProgramSerializer
@@ -884,7 +727,6 @@ class CreateDietView(generics.GenericAPIView):
 
 class DietSearchView(generics.ListAPIView):
     serializer_class = DietSerializer
-    # permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         diet_name = self.kwargs['diet_name']
@@ -894,23 +736,20 @@ class DietSearchView(generics.ListAPIView):
         except Diet.DoesNotExist:
             return None
 
-
-# class MemberDietShowToOnwer(generics.ListAPIView):
-#     # queryset = Diet.objects.all()
-#     serializer_class = ProgramSerializer
+class MemberDietShowToOnwer(generics.ListAPIView):
+    serializer_class = ProgramSerializer
     
-#     def get_object(self):
-#         try:
-#             club_name = Diet.objects.get(
-#                 owner__user_profile__username = self.kwargs['owner_username'])
-#             diet = Diet.objects.get(club__name = club_name)
-#             return DMR.objects.get(diet = diet)
-#         except DMR.DoesNotExist:
-#             return None
+    def get_object(self):
+        try:
+            club_name = Diet.objects.get(
+                owner__user_profile__username = self.kwargs['owner_username'])
+            diet = Diet.objects.get(club__name = club_name)
+            return DMR.objects.get(diet = diet)
+        except DMR.DoesNotExist:
+            return None
     
 class ClubSearchView(generics.ListAPIView):
     serializer_class = ClubSerializer
-    # permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         club_name = self.kwargs['club_name']
@@ -919,7 +758,6 @@ class ClubSearchView(generics.ListAPIView):
             return Club.objects.filter(name__icontains = club_name)
         except Club.DoesNotExist:
             return None
-
 
 class JoinToClubView(generics.GenericAPIView):
     serializer_class = JoinToClubSerializer
@@ -947,7 +785,6 @@ class JoinToClubView(generics.GenericAPIView):
             return Response({'detail': _('Member enrolled to this club successfully')})
         
         return Response({'detail': _("There was a problem with enrolling to club.")}, status=status.HTTP_400_BAD_REQUEST)
-
 
 class EnrollToProgramView(generics.GenericAPIView):
     serializer_class = EnrollProgramSerializer
@@ -979,8 +816,6 @@ class EnrollToProgramView(generics.GenericAPIView):
         
         return Response({'detail': _("There was a problem with enrolling to program.")}, status=status.HTTP_400_BAD_REQUEST)
         
-        # return Response({'detail': _("You are not joint to this club.")})
-
 class EnrollToDietView(generics.GenericAPIView):
     serializer_class = EnrollDietSerializer
     
@@ -1011,7 +846,6 @@ class EnrollToDietView(generics.GenericAPIView):
         
         return Response({'detail': _("There was a problem with enrolling to diet.")}, status=status.HTTP_400_BAD_REQUEST)
         
-        # return Response({'detail': _("You are not joint to this club.")})
 
 ########################################
 ########################################
@@ -1033,14 +867,12 @@ class EducationView(generics.RetrieveAPIView):
     serializer_class = EducationSerializer
     lookup_field = 'id'
     lookup_url_kwarg = 'education_id'
-    # permission_classes = [IsAuthenticated,]
 
-# class DeleteEducationView(generics.GenericAPIView):
-#     pass
+class DeleteEducationView(generics.GenericAPIView):
+    pass
 
 class FeedPageForEducationView(generics.ListAPIView):
     pass
-
 
 class EducationLikeView(generics.CreateAPIView):
     serializer_class = EdMRSerializer
@@ -1108,7 +940,6 @@ class EducationDislikeView(generics.UpdateAPIView):
 
 class EducationSearchView(generics.ListAPIView):
     serializer_class = EducationSerializer
-    # permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         text = self.kwargs['text']

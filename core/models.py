@@ -143,8 +143,6 @@ class ForgetPasswordLinkObjectManager(models.Manager):
                 #         (user_profile_email.created_at - timezone.now())
                 }
 
-
-
 class ForgetPasswordLink(models.Model):
     RETRY_TIME = 2
 
@@ -166,13 +164,9 @@ class ForgetPasswordLink(models.Model):
 #         #link = request.build_absolute_uri(link_text)
 #         #link = str(request.get_host) + link_text
 #         #link = request.build_absolute_uri(reverse('view_name', args=(instance.link, )))
-#         send_change_password_email(instance.user_profile.first_name, instance.user_profile.email, instance.link)
+#         send_change_password_email(instance.user_profile.first_name, instance.user_profile.email, instance.link)      
+        
 
-        
-        
-        
-        
-# model Member
 class Member(models.Model):    
     Male = 0
     Female = 1
@@ -192,13 +186,10 @@ class Member(models.Model):
     # hip = models.IntegerField(max_length =255, null=True, blank=True)
     # thigh = models.IntegerField(max_length =255, null=True, blank=True)
     wallet = models.BigIntegerField(default=0)
-    # record = models.BooleanField(default = False)
-    # group = models.IntegerField(default = 1)
     
     def __str__(self):
         return self.user_profile.username
-        
-# model Club
+
 class Trainer(models.Model):
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name="trainer")
     def __str__(self):
@@ -212,8 +203,6 @@ class Owner(models.Model):
 
 class Club(models.Model):
     owner = models.OneToOneField(Owner, on_delete=models.CASCADE, related_name="club")
-    # programs = models.OneToOneField(Program, on_delete=models.CASCADE, related_name="program")
-    # trainers = models.ManyToManyField(Trainer, related_name="trainers", blank=True)
     name = models.CharField(max_length=32)
     address = models.TextField(max_length=500)
     enrollers = models.ManyToManyField(UserProfile, related_name="enrollers", blank=True)
@@ -237,7 +226,6 @@ class Event(models.Model):
         return (self.owner.user_profile.username +
                 "->" + self.title)
  
- 
 class TargetCategory(models.Model):
     name = models.CharField(max_length=110)
     def __str__(self):
@@ -252,27 +240,7 @@ class Target(models.Model):
     def __str__(self):
         return (self.member.user_profile.username + 
                 "->" + self.category.name)
-    
-    
-# Trainer-Club Relation
-class TCR(models.Model):
-    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="TCR_trainers")
-    club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="TCR_club")
-    
 
-# Member-Club Relation
-class MCR(models.Model):
-    club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="MCR_club")
-    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="MCR_member")
-    
-    
-# Event-Members Relation
-class EMR(models.Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="EMR_event")
-    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="EMR_member")
-    isRegistered = models.BooleanField(default=False)
-    
-    
 class Program(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(max_length=50, blank=True, null=True)
@@ -285,14 +253,6 @@ class Program(models.Model):
     
     def __str__(self):
         return (self.trainer.user_profile.username + "->" + self.name)
-    
-# Member-Program Relation
-class MPR(models.Model):
-    program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name="MPR_program")
-    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="MPR_member")
-    is_finished = models.BooleanField(default=False)
-    
-    
     
 class Diet(models.Model):
     name = models.CharField(max_length=50)
@@ -307,6 +267,27 @@ class Diet(models.Model):
     def __str__(self):
         return (self.trainer.user_profile.username + "->" + self.name)
     
+# Trainer-Club Relation
+class TCR(models.Model):
+    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="TCR_trainers")
+    club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="TCR_club")
+    
+# Member-Club Relation
+class MCR(models.Model):
+    club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="MCR_club")
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="MCR_member")
+     
+# Event-Members Relation
+class EMR(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="EMR_event")
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="EMR_member")
+    isRegistered = models.BooleanField(default=False)
+    
+# Member-Program Relation
+class MPR(models.Model):
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name="MPR_program")
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="MPR_member")
+    is_finished = models.BooleanField(default=False)  
     
 # Diet-Member Relation
 class DMR(models.Model):
@@ -314,28 +295,11 @@ class DMR(models.Model):
     member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="DMR_member")
     is_finished = models.BooleanField(default=False)
     
-    
 ###############################
 ###############################
 ###############################
 
 # Bounus Part
-
-# class Education(models.Model):
-#     name = models.CharField(max_length=50)
-#     description = models.TextField(max_length=50, blank=True, null=True)
-#     image = models.ImageField(upload_to=None, height_field=None, width_field=None, max_length=100, null = True, blank = True)
-#     created_at = models.DateTimeField(auto_now_add=True)
-
-#     def __str__(self):
-#         return (self.trainer.user_profile.username + "->" + self.name)
-    
-
-# Education-Trainer Relation
-# class ETR(models.Model):
-#     education = models.ForeignKey(Education, on_delete=models.CASCADE, related_name="ETR_education") 
-#     trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="ETR_trainer") 
-
 
 class Education(models.Model):
     trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="educations", default = None)
@@ -355,7 +319,7 @@ class Education(models.Model):
         except:
             return False
 
-
+# Education-Member Relation
 class EdMR(models.Model):
     member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="EdMR_member")
     education = models.ForeignKey(Education, on_delete=models.CASCADE, related_name="EdMR_education")

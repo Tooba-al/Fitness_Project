@@ -3,7 +3,6 @@ from .models import *
 from django.utils.translation import gettext as _
 
 class UserProfileDataSerializer(serializers.ModelSerializer):
-    # user_username = serializers.CharField(max_length=100)
     situation = serializers.SerializerMethodField()
 
     class Meta:
@@ -27,8 +26,6 @@ class UserProfileDataSerializer(serializers.ModelSerializer):
         if _flag == 2:
             return "Club Owner"
 
-
-# class UserProfileDataEditSerializer(serializers.ModelSerializer):
 class UserProfileDataEditSerializer(serializers.Serializer):
     user_username = serializers.CharField(max_length=100)
     class Meta:
@@ -36,28 +33,11 @@ class UserProfileDataEditSerializer(serializers.Serializer):
     #     fields =  ['user_username', 'first_name', 'last_name', 'email']
         fields =  ['first_name', 'last_name', 'email']
         
-# class UserDataSerializer(serializers.ModelSerializer):
 class UserDataSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=100)
     class Meta:
         model = UserProfile
-    #     fields =  ['user_username']
         fields =  ['user_username', 'username', 'password', 'first_name', 'last_name', 'email']
-        # fields =  ['username', 'password', 'first_name', 'last_name', 'email']
-    # profile_data = serializers.SerializerMethodField()
-    
-    # class Meta:
-    #     model = UserProfile
-    #     fields = ['id', 'profile_data', 'username']
-        
-    # def get_profile_data(self, instance):
-    #     _user_profile = instance.user
-    #     _profile_data = {}
-    #     _profile_data['username'] = _user_profile.username
-    #     _profile_data['first_name'] = _user_profile.first_name
-    #     _profile_data['last_name'] = _user_profile.last_name
-    #     return _profile_data
-
 
 class UserSignUpSerializer(serializers.ModelSerializer):
     # record = serializers.BooleanField(default = False)
@@ -92,14 +72,6 @@ class OwnerSignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['username','password', 'first_name', 'last_name', 'email', 'club_name', 'club_address']
-        #read_only_fields = ['wallet']
-
-# class TrainerSignUpSerializer(serializers.ModelSerializer):
-#     club_name = serializers.IntegerField(allow_null=True)
-#     class Meta:
-#         model = UserProfile
-#         fields = ['username','password', 'first_name', 'last_name', 'email', 'club_name']
-#         #read_only_fields = ['wallet']
 
 class UserProfileEmailVerificationSerializer(serializers.Serializer):
     code = serializers.CharField(max_length=10)
@@ -117,7 +89,6 @@ class ResendVerificationCodeSerializer(serializers.Serializer):
     
 class ForgetPasswordSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
-   
    
 ##################################
 ##################################
@@ -168,7 +139,6 @@ class TrainerSerializer(serializers.ModelSerializer):
         _profile_data['last_name'] = _user_profile.last_name
         return _profile_data
    
-   
 class MemberListSerializer(serializers.ModelSerializer):
     profile_data = serializers.SerializerMethodField()
     
@@ -200,89 +170,85 @@ class TrainerListSerializer(serializers.ModelSerializer):
         _profile_data['username'] = _user_profile.username
         _profile_data['first_name'] = _user_profile.first_name
         _profile_data['last_name'] = _user_profile.last_name
-
-     
-# class EventSerializer(serializers.ModelSerializer):
-#     owner_data = serializers.SerializerMethodField()
-#     member_data = serializers.SerializerMethodField()
-#     class Meta:
-#         model = Event
-#         fields = ['owner_data', 'member_data', 'title', 'description', 'date', 'capacity', 'attachment']
+ 
+class EventSerializer(serializers.ModelSerializer):
+    owner_data = serializers.SerializerMethodField()
+    member_data = serializers.SerializerMethodField()
+    class Meta:
+        model = Event
+        fields = ['owner_data', 'member_data', 'title', 'description', 'date', 'capacity', 'attachment']
     
-#     def get_owner_data(self, instance):
-#         _owner = instance.owner
-#         return OwnerSerializer(instance = _owner).data
+    def get_owner_data(self, instance):
+        _owner = instance.owner
+        return OwnerSerializer(instance = _owner).data
     
-#     def get_member_data(self, instance):
-#         _member = instance.member
-#         return MemberSerializer(instance = _member).data
+    def get_member_data(self, instance):
+        _member = instance.member
+        return MemberSerializer(instance = _member).data
   
-# class CreateEventSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Event
-#         fields = ['id', 'owner', 'title','description', 'date', 'capacity', 'attachment']
-#         read_only_fields = ['owner']
+class CreateEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = ['id', 'owner', 'title','description', 'date', 'capacity', 'attachment']
+        read_only_fields = ['owner']
         
+class SendEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = ['title', 'description', 'date', 'capacity', 'attachment']
 
-# class SendEventSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Event
-#         fields = ['title', 'description', 'date', 'capacity', 'attachment']
+class RecievedEventsSerializer(serializers.ModelSerializer):
+    member_data = serializers.SerializerMethodField()
 
-# class RecievedEventsSerializer(serializers.ModelSerializer):
-#     member_data = serializers.SerializerMethodField()
+    class Meta:
+        model = Event
+        fields = ['id', 'title', 'description', 'date', 'capacity', 'attachment']
 
-#     class Meta:
-#         model = Event
-#         fields = ['id', 'title', 'description', 'date', 'capacity', 'attachment']
+    def get_member_data(self, instance):
+        _member = instance.member
+        _user_profile = _member.user_profile
+        _profile_data = {}
+        _profile_data['username'] = _user_profile.username
+        _profile_data['first_name'] = _user_profile.first_name
+        _profile_data['last_name'] = _user_profile.last_name
+        return _profile_data
 
-#     def get_member_data(self, instance):
-#         _member = instance.member
-#         _user_profile = _member.user_profile
-#         _profile_data = {}
-#         _profile_data['username'] = _user_profile.username
-#         _profile_data['first_name'] = _user_profile.first_name
-#         _profile_data['last_name'] = _user_profile.last_name
-#         return _profile_data
+class SentEventsSerializer(serializers.ModelSerializer):
+    owner_username = serializers.SerializerMethodField()
 
-# class SentEventsSerializer(serializers.ModelSerializer):
-#     owner_username = serializers.SerializerMethodField()
+    class Meta:
+        model = Event
+        fields = ['id', 'owner', 'owner_username', 'title']
 
-#     class Meta:
-#         model = Event
-#         fields = ['id', 'owner', 'owner_username', 'title']
-
-#     def get_owner_username(self, instance):
-#         _owner = instance.owner
-#         _username = _owner.user_profile.username
-#         return _username
-
-
+    def get_owner_username(self, instance):
+        _owner = instance.owner
+        _username = _owner.user_profile.username
+        return _username
+ 
+class EventSerializer(serializers.ModelSerializer):
+    owner_data = serializers.SerializerMethodField()
+    class Meta:
+        model = Event
+        fields = ['owner_data', 'title','description', 'date', 'capacity', 'attachment']
     
-# class EventSerializer(serializers.ModelSerializer):
-#     owner_data = serializers.SerializerMethodField()
-#     class Meta:
-#         model = Event
-#         fields = ['owner_data', 'title','description', 'date', 'capacity', 'attachment']
+    def get_owner_data(self, instance):
+        _owner = instance.owner
+        return OwnerSerializer(instance = _owner).data
     
-#     def get_owner_data(self, instance):
-#         _owner = instance.owner
-#         return OwnerSerializer(instance = _owner).data
+class EMRSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EMR
+        fields = []
     
-# class EMRSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = EMR
-#         fields = []
+class EventListSerializer(serializers.ModelSerializer):
+    owner_data = serializers.SerializerMethodField()
+    class Meta:
+        model = Event
+        fields = ['owner_data', 'title', 'description', 'date', 'capacity', 'attachment']
     
-# class EventListSerializer(serializers.ModelSerializer):
-#     owner_data = serializers.SerializerMethodField()
-#     class Meta:
-#         model = Event
-#         fields = ['owner_data', 'title', 'description', 'date', 'capacity', 'attachment']
-    
-#     def get_owner_data(self, instance):
-#         _owner = instance.owner
-#         return OwnerListSerializer(instance = _owner).data
+    def get_owner_data(self, instance):
+        _owner = instance.owner
+        return OwnerListSerializer(instance = _owner).data
     
 class ClubSerializer(serializers.ModelSerializer):
     owner_data = serializers.SerializerMethodField()
@@ -298,28 +264,7 @@ class ClubSerializer(serializers.ModelSerializer):
         _owner_data['username'] = _user_profile.user.username
         _owner_data['first_name'] = _user_profile.user.first_name
         _owner_data['last_name'] = _user_profile.user.last_name
-        return _owner_data
-    
-    # def get_trainer_data(self, instance):
-    #     _user_profile = instance.trainer.user_profile
-    #     _trainer_data = {}
-    #     _trainer_data['username'] = _user_profile.user.username
-    #     _trainer_data['first_name'] = _user_profile.user.first_name
-    #     _trainer_data['last_name'] = _user_profile.user.last_name
-    #     return _trainer_data
-    
-# class ClubListSerializer(serializers.ModelSerializer):
-#     owner_data = serializers.SerializerMethodField()
-#     trainers_list = serializers.SerializerMethodField()
-    
-#     class Meta:
-#         model = Club
-#         fields = ['id', 'name', 'owner_data', 'trainers_list']
-        
-#     def get_owner_data(self, instance):
-#         _owner = instance.owner
-#         return OwnerSerializer(instance = _owner).data
-        
+        return _owner_data   
         
 class AddToWalletSerializer(serializers.ModelSerializer):
     wallet_data = serializers.SerializerMethodField()
@@ -335,7 +280,6 @@ class AddToWalletSerializer(serializers.ModelSerializer):
         _owner_data = {}
         _owner_data['wallet'] = _user_profile.wallet
         return _owner_data
-
 
 class AddTrainerSerializer(serializers.Serializer):
     owner_username = serializers.CharField(max_length=32)
@@ -354,29 +298,7 @@ class ProgramSerializer(serializers.ModelSerializer):
         model = Program
         fields = ['id', 'name', 'price', 'image', 
                   'club_name', 'trainer_username', 'owner_username']
-        # fields = ['id', 'name', 'price', 'club_data', 'image', 'owner_data', 'trainer_data']
         
-    # def get_owner_data(self, instance):
-    #     _user_profile = instance.user_profile
-    #     _owner_data = {}
-    #     _owner_data['username'] = _user_profile.user.username
-    #     _owner_data['first_name'] = _user_profile.user.first_name
-    #     _owner_data['last_name'] = _user_profile.user.last_name
-        
-    # def get_trainer_data(self, instance):
-    #     _user_profile = instance.user_profile
-    #     _trainer_data = {}
-    #     _trainer_data['username'] = _user_profile.user.username
-    #     _trainer_data['first_name'] = _user_profile.user.first_name
-    #     _trainer_data['last_name'] = _user_profile.user.last_name
-        
-    # def get_trainer_data(self, instance):
-    #     _user_profile = instance.user_profile
-    #     _club_data = {}
-    #     _club_data['username'] = _user_profile.user.username
-    #     _club_data['first_name'] = _user_profile.user.first_name
-    #     _club_data['last_name'] = _user_profile.user.last_name
-    
 class ProgramListSerializer(serializers.ModelSerializer):
     trainer_data = serializers.SerializerMethodField()
     club_data = serializers.SerializerMethodField()
@@ -402,7 +324,6 @@ class ProgramListSerializer(serializers.ModelSerializer):
         _club_data['name'] = _club.name
         _club_data['address'] = _club.address
         return _club_data
-    
     
 # class MemberProgramShowToOwnerSerializer(serializers.Serializer):
 #     club_name = serializers.CharField(max_length = 32)
@@ -466,32 +387,55 @@ class DietistSerializer(serializers.ModelSerializer):
         _club_data['address'] = _club.address
         return _club_data
 
-
-
 class EnrollProgramSerializer(serializers.Serializer):
     member_username = serializers.CharField(max_length=32)
     program_name = serializers.CharField(max_length=32)
     club_name = serializers.CharField(max_length=32)
     
-
 class EnrollDietSerializer(serializers.Serializer):
     member_username = serializers.CharField(max_length=32)
     diet_name = serializers.CharField(max_length=32)
     club_name = serializers.CharField(max_length=32)
     
-
 class JoinToClubSerializer(serializers.Serializer):
     member_username = serializers.CharField(max_length=32)
-    club_name = serializers.CharField(max_length=32)
-    
-    
+    club_name = serializers.CharField(max_length=32)  
+
+# Trainer-Club Relation
+class TCRSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TCR
+        fields = []
+
+# Member-Club Relation
+class MCRSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MCR
+        fields = []
+        
+# Event-Member Relation
+class EMRSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EMR
+        fields = []
+
+# Member-Program Relation
+class MPRSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MPR
+        fields = []
+
+# Diet-Member Relation
+class DMRSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMR
+        fields = []
 
 ###############################
 ###############################
 ###############################
 
 # Bounus Part
-
 
 class EducationSerializer(serializers.ModelSerializer):
     is_liked = serializers.SerializerMethodField()
@@ -519,8 +463,8 @@ class EducationCreateSerializer(serializers.ModelSerializer):
         fields = ['id', 'trainer', 'name', 'text', 'image', 'created_at']
         read_only_fields = ['trainer']
 
+# Education-Member Relation
 class EdMRSerializer(serializers.ModelSerializer):
     class Meta:
         model = EdMR
-        #fields = ['user_profile', 'education', 'isUsefull','isLiked','isSaved','created_at']
         fields = []
