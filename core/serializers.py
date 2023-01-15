@@ -15,8 +15,10 @@ class UserProfileDataSerializer(serializers.ModelSerializer):
 
         if hasattr(instance, 'member'):
             _flag =1
-        elif hasattr(instance, 'club_owner'):
+        elif hasattr(instance, 'owner'):
             _flag = 2
+        elif hasattr(instance, 'trainer'):
+            _flag = 3
 
 
         if _flag == 0:
@@ -25,13 +27,32 @@ class UserProfileDataSerializer(serializers.ModelSerializer):
             return "Member"
         if _flag == 2:
             return "Club Owner"
+        if _flag == 3:
+            return "Trainer"
 
-class UserProfileDataEditSerializer(serializers.Serializer):
-    user_username = serializers.CharField(max_length=100)
+class UserProfileDataEditSerializer(serializers.ModelSerializer):
+    profile_data = serializers.SerializerMethodField()
     class Meta:
-        model = UserProfile
-    #     fields =  ['user_username', 'first_name', 'last_name', 'email']
-        fields =  ['first_name', 'last_name', 'email']
+        model = Member
+        fields =  ['profile_data', 'height', 'weight']
+
+    def get_profile_data(self, instance):
+        _user_profile = instance.user_profile
+        _profile_data = {}
+        _profile_data['first_name'] = _user_profile.first_name
+        _profile_data['last_name'] = _user_profile.last_name
+        return _profile_data
+    
+    def put(self, instance):
+        _user_profile = instance.user_profile
+        _profile_data = {}
+        _profile_data['first_name'] = _user_profile.first_name
+        _profile_data['last_name'] = _user_profile.last_name
+
+class MemberDataEditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Member
+        fields =  ['first_name', 'last_name', 'email', 'sex']
         
 class UserDataSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=100)
@@ -144,7 +165,7 @@ class MemberListSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Member
-        fields = ['id', 'profile_data']
+        fields = ['id', 'profile_data', 'weight', 'height', 'sex', 'wallet']
         
     def get_profile_data(self, instance):
         _user_profile = instance.user_profile
@@ -152,10 +173,7 @@ class MemberListSerializer(serializers.ModelSerializer):
         _profile_data['username'] = _user_profile.username
         _profile_data['first_name'] = _user_profile.first_name
         _profile_data['last_name'] = _user_profile.last_name
-        _profile_data['weight'] = _user_profile.weight
-        _profile_data['height'] = _user_profile.height
-        _profile_data['sex'] = _user_profile.sex
-        _profile_data['wallet'] = _user_profile.wallet
+        return _profile_data
    
 class TrainerListSerializer(serializers.ModelSerializer):
     profile_data = serializers.SerializerMethodField()
@@ -170,6 +188,22 @@ class TrainerListSerializer(serializers.ModelSerializer):
         _profile_data['username'] = _user_profile.username
         _profile_data['first_name'] = _user_profile.first_name
         _profile_data['last_name'] = _user_profile.last_name
+        return _profile_data
+   
+class OwnerListSerializer(serializers.ModelSerializer):
+    profile_data = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Owner
+        fields = ['id', 'profile_data']
+        
+    def get_profile_data(self, instance):
+        _user_profile = instance.user_profile
+        _profile_data = {}
+        _profile_data['username'] = _user_profile.username
+        _profile_data['first_name'] = _user_profile.first_name
+        _profile_data['last_name'] = _user_profile.last_name
+        return _profile_data
  
 class EventSerializer(serializers.ModelSerializer):
     owner_data = serializers.SerializerMethodField()
@@ -273,6 +307,7 @@ class AddToWalletSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Member
+        fields = ['id', 'wallet_data', 'amount']
         fields = ['id', 'wallet_data', 'username', 'amount']
         
     def get_wallet_data(self, instance):

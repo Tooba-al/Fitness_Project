@@ -20,14 +20,16 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('owner/signup/', OwnerSignUpView.as_view()),
     path('user/signup/', UserSignUpView.as_view()),
-    path('user/login/', LoginView.as_view()),
+    path('login/', LoginView.as_view()),
     path('forget-password/', ForgetPasswordView.as_view()),
     # path('change-password/<str:change_link>/', ChangePasswordView.as_view()),
     path('change-password/', ChangePasswordView.as_view()),
     path('resend-code/', ResendVerificationCodeView.as_view()),
     # path('verify-email/', UserProfileAuthTokenView.as_view()),
     path('profile/data/', RetrieveUserProfileDataView.as_view()),
+    # path('profile/<str:username>/data/', RetrieveUserProfileDataView.as_view()),
     path('profile/edit/', RetrieveUserProfileEditView.as_view()),
+    # path('profile/<str:username>/edit/', RetrieveUserProfileEditView.as_view()),
     path('profile/add-to-wallet/', AddToWalletView.as_view()),
     
     path('search/owner/<str:owner_username>/', OwnerSearchView.as_view()),
@@ -38,22 +40,25 @@ urlpatterns = [
     path('search/club/<str:club_name>/', ClubSearchView.as_view()),
     path('search/education/<str:text>/', EducationSearchView.as_view()),
     
-    path('member/<str:memver_username>/', MemberView.as_view()),
+    path('member/<str:username>/', MemberView.as_view()),
     path('member/list/', ShowMemberListView.as_view()),
     path('member/join/club/', JoinToClubView.as_view()),
     path('member/enroll/program/', EnrollToProgramView.as_view()),
     path('member/enroll/diet/', EnrollToDietView.as_view()),
     
+    path('owner/<str:username>/', OwnerView.as_view()),
     path('owner/list/', ShowOwnerListView.as_view()),
+    path('club/<int:club_id>/', ClubView.as_view()),
     path('club/list/', ShowClubListView.as_view()),
     path('owner/mem-prog/list/<str:owner_username>/', MemberProgramShowToOnwer.as_view()),
     
-    path('event/create/', CreateEventView.as_view()),
+    # path('event/create/', CreateEventView.as_view()),
     path('event/<int:event_id>/delete/', DeleteEventView.as_view()),
     path('event/<int:request_id>/register/', RejisterEventView.as_view()),
     path('event/<int:request_id>/unregister/', UnrejisterEventView.as_view()),
     path('event/list/', ShowEventListView.as_view()),
     
+    path('trainer/<str:username>/', TrainerView.as_view()),
     path('trainer/list/', ShowTrainerListView.as_view()),
     path('trainer/add/', AddTrainerView.as_view()),
     
@@ -71,7 +76,7 @@ urlpatterns = [
     path('education/<int:education_id>/delete/', DeleteEducationView.as_view()),
     path('education/<int:education_id>/like/', EducationLikeView.as_view()),
     path('education/<int:education_id>/dislike/', EducationDislikeView.as_view()),
-    path('education/feed-page/', FeedPageForEducationView.as_view()),
+    # path('education/feed-page/', FeedPageForEducationView.as_view()),
     path('education/<int:education_id>/', EducationView.as_view()),
     
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
