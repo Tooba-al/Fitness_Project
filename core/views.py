@@ -372,55 +372,90 @@ class DietListView(generics.ListAPIView):
     queryset = Diet.objects.all()
     serializer_class = ProgramListSerializer
     
-class MemberView(generics.RetrieveAPIView):
-    queryset = Member.objects.all()
+class MemberView(generics.ListAPIView):
     serializer_class = MemberSerializer
     lookup_field = 'id'
     lookup_url_kwarg = 'username'
     
-    # def get_queryset(self):
-    #     username = self.kwargs['username']
-    #     print(username)
-    #     try:
-    #         return Member.objects.get(user_profile__username = username)
-    #     except Member.DoesNotExist:
-    #         return None
+    def get_queryset(self):
+        username = self.kwargs['username']
+        try:
+            return [Member.objects.filter(user_profile__username = username)][0]
+        except Member.DoesNotExist:
+            return None
     
-class TrainerView(generics.RetrieveAPIView):
-    queryset = Member.objects.all()
+class TrainerView(generics.ListAPIView):
     serializer_class = TrainerSerializer
     lookup_field = 'id'
     lookup_url_kwarg = 'username'
     
-class OwnerView(generics.RetrieveAPIView):
-    queryset = Member.objects.all()
+    def get_queryset(self):
+        username = self.kwargs['username']
+        try:
+            return [Trainer.objects.filter(user_profile__username = username)][0]
+        except Trainer.DoesNotExist:
+            return None
+    
+    
+class OwnerView(generics.ListAPIView):
     serializer_class = OwnerSerializer
     lookup_field = 'id'
     lookup_url_kwarg = 'username'
+    
+    def get_queryset(self):
+        username = self.kwargs['username']
+        try:
+            return [Owner.objects.filter(user_profile__username = username)][0]
+        except Owner.DoesNotExist:
+            return None
 
-class ClubView(generics.RetrieveAPIView):
-    queryset = Event.objects.all()
+class ClubView(generics.ListAPIView):
     serializer_class = ClubSerializer
     lookup_field = 'id'
     lookup_url_kwarg = 'club_id'
+    
+    def get_queryset(self):
+        id = self.kwargs['club_id']
+        try:
+            return [Club.objects.filter(id = id)][0]
+        except Club.DoesNotExist:
+            return None
 
-class EventView(generics.RetrieveAPIView):
-    queryset = Event.objects.all()
+class EventView(generics.ListAPIView):
     serializer_class = EventSerializer
     lookup_field = 'id'
     lookup_url_kwarg = 'event_id'
     
-class ProgramView(generics.RetrieveAPIView):
-    queryset = Program.objects.all()
+    def get_queryset(self):
+        id = self.kwargs['event_id']
+        try:
+            return [Event.objects.filter(id = id)][0]
+        except Event.DoesNotExist:
+            return None
+    
+class ProgramView(generics.ListAPIView):
     serializer_class = ProgramSerializer
     lookup_field = 'id'
     lookup_url_kwarg = 'program_id'
+    
+    def get_queryset(self):
+        id = self.kwargs['program_id']
+        try:
+            return [Program.objects.filter(id = id)][0]
+        except Program.DoesNotExist:
+            return None
 
-class DietView(generics.RetrieveAPIView):
-    queryset = Diet.objects.all()
+class DietView(generics.ListAPIView):
     serializer_class = DietSerializer
     lookup_field = 'id'
     lookup_url_kwarg = 'diet_id'
+    
+    def get_queryset(self):
+        id = self.kwargs['diet_id']
+        try:
+            return [Diet.objects.filter(id = id)][0]
+        except Diet.DoesNotExist:
+            return None
         
 ###################################
 ###################################
@@ -591,20 +626,15 @@ class AddToWalletView(generics.RetrieveAPIView):
 class AddTrainerView(generics.GenericAPIView):
     serializer_class = AddTrainerSerializer
     
-    def get_object(self):
-        try:
-            username = self.request.data.get('owner_username')
-            owner = Owner.objects.get(user_profile__username = username)
-            return owner
-        except UserProfile.DoesNotExist:
-            return None
-    
-    def put(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
+        print("gayidim")
+        
+        username = request.data.get('owner_username')
+        owner = Owner.objects.get(user_profile__username = username)
+        
         s = self.serializer_class(data=request.data)
         s.is_valid(raise_exception=True)
         valid = s.validated_data
-        
-        owner = self.get_object()
         
         if owner!=None:
             user_profile = UserProfile.objects.create(
@@ -619,7 +649,6 @@ class AddTrainerView(generics.GenericAPIView):
             trainer = Trainer.objects.create(user_profile = user_profile)
             trainer.save()
             return Response({'detail': _('Trainer added successfully')})
-        
         return Response({'detail': _("There was a problem with adding a trainer.")}, status=status.HTTP_400_BAD_REQUEST)
 
 class CreateProgramView(generics.GenericAPIView):
@@ -649,7 +678,6 @@ class CreateProgramView(generics.GenericAPIView):
                 price = valid.get('price'),
                 trainer = trainer,
                 club = club,
-                # owner = owner,
             )
             program.save()
             return Response({'detail': _('Program added successfully')})

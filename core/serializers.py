@@ -120,7 +120,7 @@ class MemberSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Member
-        fields = ['id', 'profile_data', 'weight', 'height', 'wallet']
+        fields = ['id', 'profile_data', 'weight', 'height', 'wallet', 'sex']
         
     def get_profile_data(self, instance):
         _user_profile = instance.user_profile
@@ -210,7 +210,7 @@ class EventSerializer(serializers.ModelSerializer):
     member_data = serializers.SerializerMethodField()
     class Meta:
         model = Event
-        fields = ['owner_data', 'member_data', 'title', 'description', 'date', 'capacity', 'attachment']
+        fields = ['id', 'owner_data', 'member_data', 'title', 'description', 'date', 'capacity', 'attachment']
     
     def get_owner_data(self, instance):
         _owner = instance.owner
@@ -229,7 +229,7 @@ class CreateEventSerializer(serializers.ModelSerializer):
 class SendEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = ['title', 'description', 'date', 'capacity', 'attachment']
+        fields = ['id' ,'title', 'description', 'date', 'capacity', 'attachment']
 
 class RecievedEventsSerializer(serializers.ModelSerializer):
     member_data = serializers.SerializerMethodField()
@@ -263,7 +263,7 @@ class EventSerializer(serializers.ModelSerializer):
     owner_data = serializers.SerializerMethodField()
     class Meta:
         model = Event
-        fields = ['owner_data', 'title','description', 'date', 'capacity', 'attachment']
+        fields = ['id', 'owner_data', 'title','description', 'date', 'capacity', 'attachment']
     
     def get_owner_data(self, instance):
         _owner = instance.owner
@@ -278,7 +278,7 @@ class EventListSerializer(serializers.ModelSerializer):
     owner_data = serializers.SerializerMethodField()
     class Meta:
         model = Event
-        fields = ['owner_data', 'title', 'description', 'date', 'capacity', 'attachment']
+        fields = ['id', 'owner_data', 'title', 'description', 'date', 'capacity', 'attachment']
     
     def get_owner_data(self, instance):
         _owner = instance.owner
