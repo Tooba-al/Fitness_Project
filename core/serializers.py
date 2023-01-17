@@ -220,11 +220,13 @@ class EventSerializer(serializers.ModelSerializer):
         _member = instance.member
         return MemberSerializer(instance = _member).data
   
-class CreateEventSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Event
-        fields = ['id', 'owner', 'title','description', 'date', 'capacity', 'attachment']
-        read_only_fields = ['owner']
+class CreateEventSerializer(serializers.Serializer):
+    owner_username = serializers.CharField(max_length=32)
+    title = serializers.CharField(max_length=100)
+    description = serializers.CharField(max_length=500)
+    date = serializers.DateField()
+    capacity = serializers.IntegerField(default=0)
+    attachment = serializers.ImageField(allow_null=True)
         
 class SendEventSerializer(serializers.ModelSerializer):
     class Meta:
@@ -298,7 +300,17 @@ class ClubSerializer(serializers.ModelSerializer):
         _owner_data['username'] = _user_profile.user.username
         _owner_data['first_name'] = _user_profile.user.first_name
         _owner_data['last_name'] = _user_profile.user.last_name
-        return _owner_data   
+        return _owner_data  
+     
+class ClubListSerializer(serializers.ModelSerializer):
+    owner_data = serializers.SerializerMethodField()
+    class Meta:
+        model = Club
+        fields = ['id', 'owner_data', 'name', 'address']
+    
+    def get_owner_data(self, instance):
+        _owner = instance.owner
+        return OwnerListSerializer(instance = _owner).data
         
 class AddToWalletSerializer(serializers.ModelSerializer):
     wallet_data = serializers.SerializerMethodField()
@@ -324,15 +336,45 @@ class AddTrainerSerializer(serializers.Serializer):
     last_name = serializers.CharField(max_length=100)
     email = serializers.CharField(max_length =255)
 
-class ProgramSerializer(serializers.ModelSerializer):
+class CreateProgramSerializer(serializers.Serializer):
     owner_username = serializers.CharField(max_length=32)
     trainer_username = serializers.CharField(max_length=32)
     club_name = serializers.CharField(max_length=32)
-    # owner_data = serializers.SerializerMethodField()
+    name = serializers.CharField(max_length=32)
+    price = serializers.IntegerField(default = 0)
+    image = serializers.ImageField(allow_null=True)
+    
+    # class Meta:
+    #     model = Program
+    #     fields = ['id', 'name', 'price', 'image']
+        # fields = ['name', 'price', 'image']
+        
+class ProgramSerializer(serializers.ModelSerializer):
+    trainer_data = serializers.SerializerMethodField()
+    club_data = serializers.SerializerMethodField()
+    
     class Meta:
         model = Program
         fields = ['id', 'name', 'price', 'image', 
-                  'club_name', 'trainer_username', 'owner_username']
+                  'trainer_data', 'club_data']
+        # fields = ['name', 'price', 'image']
+        
+    def get_trainer_data(self, instance):
+        _user_profile = instance.trainer.user_profile
+        _trainer_data = {}
+        _trainer_data['first_name'] = _user_profile.first_name
+        _trainer_data['last_name'] = _user_profile.last_name
+        return _trainer_data
+    
+        
+    def get_club_data(self, instance):
+        _club = instance.club
+        _club_data = {}
+        _club_data['owner_first'] = _club.owner.user_profile.first_name
+        _club_data['owner_last'] = _club.owner.user_profile.last_name
+        _club_data['name'] = _club.name
+        # _club_data['address'] = _club.address
+        return _club_data
         
 class ProgramListSerializer(serializers.ModelSerializer):
     trainer_data = serializers.SerializerMethodField()
@@ -388,13 +430,42 @@ class ProgramListSerializer(serializers.ModelSerializer):
 #         _program_data['club'] = _program.club.name
 #         return _program_data
 
-class DietSerializer(serializers.ModelSerializer):
+class CreateDietSerializer(serializers.Serializer):
+    owner_username = serializers.CharField(max_length=32)
     trainer_username = serializers.CharField(max_length=32)
     club_name = serializers.CharField(max_length=32)
+    name = serializers.CharField(max_length=32)
+    description = serializers.CharField(max_length=255)
+    price = serializers.IntegerField(default = 0)
+    image = serializers.ImageField(allow_null=True)
+    # day = serializers.IntegerField(allow_null=True)
+    
+class DietSerializer(serializers.ModelSerializer):
+    trainer_data = serializers.SerializerMethodField()
+    club_data = serializers.SerializerMethodField()
+    
     class Meta:
         model = Diet
-        fields = ['id', 'name', 'description', 'price', 
-                  'image', 'day', 'trainer_username', 'club_name']
+        fields = ['id', 'name', 'price', 'image', 
+                  'trainer_data', 'club_data']
+        # fields = ['name', 'price', 'image']
+        
+    def get_trainer_data(self, instance):
+        _user_profile = instance.trainer.user_profile
+        _trainer_data = {}
+        _trainer_data['first_name'] = _user_profile.first_name
+        _trainer_data['last_name'] = _user_profile.last_name
+        return _trainer_data
+    
+        
+    def get_club_data(self, instance):
+        _club = instance.club
+        _club_data = {}
+        _club_data['owner_first'] = _club.owner.user_profile.first_name
+        _club_data['owner_last'] = _club.owner.user_profile.last_name
+        _club_data['name'] = _club.name
+        # _club_data['address'] = _club.address
+        return _club_data
 
 class DietistSerializer(serializers.ModelSerializer):
     trainer_data = serializers.SerializerMethodField()
@@ -419,7 +490,7 @@ class DietistSerializer(serializers.ModelSerializer):
         _club_data['owner_first'] = _club.owner.user_profile.first_name
         _club_data['owner_last'] = _club.owner.user_profile.last_name
         _club_data['name'] = _club.name
-        _club_data['address'] = _club.address
+        # _club_data['address'] = _club.address
         return _club_data
 
 class EnrollProgramSerializer(serializers.Serializer):

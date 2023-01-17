@@ -259,7 +259,7 @@ class Diet(models.Model):
     description = models.TextField(max_length=50, blank=True, null=True)
     price = models.IntegerField(default=0)
     image = models.ImageField(upload_to=None, height_field=None, width_field=None, max_length=100, null = True, blank = True)
-    day = models.ImageField(upload_to=None, height_field=None, width_field=None, max_length=100, null = True, blank = True)
+    # day = models.IntegerField(default = 1)
     # owner = models.ForeignKey(Owner, on_delete=models.CASCADE, related_name="program_owner")
     trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="diet_trainer")
     club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="diet_club")
@@ -272,10 +272,18 @@ class TCR(models.Model):
     trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="TCR_trainers")
     club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="TCR_club")
     
+    def __str__(self):
+        return (self.trainer.user_profile.username + "->" + 
+                self.club.name)
+    
 # Member-Club Relation
 class MCR(models.Model):
     club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="MCR_club")
     member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="MCR_member")
+     
+    def __str__(self):
+        return (self.member.user_profile.username + "->" + 
+                self.club.name)
      
 # Event-Members Relation
 class EMR(models.Model):
@@ -283,17 +291,29 @@ class EMR(models.Model):
     member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="EMR_member")
     isRegistered = models.BooleanField(default=False)
     
+    def __str__(self):
+        return (self.member.user_profile.username + "->" + 
+                self.event.name + " : " + self.isRegistered)
+    
 # Member-Program Relation
 class MPR(models.Model):
     program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name="MPR_program")
     member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="MPR_member")
     is_finished = models.BooleanField(default=False)  
     
+    def __str__(self):
+        return (self.member.user_profile.username + "->" + 
+                self.program.name + " : " + str(self.is_finished))
+    
 # Diet-Member Relation
 class DMR(models.Model):
     diet = models.ForeignKey(Diet, on_delete=models.CASCADE, related_name="DMR_diet")
     member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="DMR_member")
     is_finished = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return (self.member.user_profile.username + "->" + 
+                self.diet.name + " : " + self.is_finished)
     
 ###############################
 ###############################
@@ -325,3 +345,7 @@ class EdMR(models.Model):
     education = models.ForeignKey(Education, on_delete=models.CASCADE, related_name="EdMR_education")
     isLiked = models.BooleanField(default = False)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    # def __str__(self):
+    #     return (self.member.user_profile.username + "->" + 
+    #             self.education.name)

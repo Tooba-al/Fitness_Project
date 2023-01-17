@@ -97,18 +97,16 @@ class OwnerSignUpView(generics.GenericAPIView):
                                                         last_name = valid.get('last_name'),                                                
                                                         user=User.objects.create(
                                                         username=s.validated_data.get('username')))
+                user_profile.save()
                 owner = Owner.objects.create(
                     user_profile = user_profile,
                 )
+                owner.save()
                 club = Club.objects.create(
                     owner = owner,
                     name = valid.get('club_name'),
                     address = valid.get('club_address'),
                 )
-                #wallet = Wallet.objects.create(owner = user_profile)
-                #user_profile.wallet = wallet
-                user_profile.save()
-                owner.save()
                 club.save()
 
                 # upv = UserProfileEmailVerification.objects.create(user_profile=self.get_object())
@@ -361,7 +359,7 @@ class ShowTrainerListView(generics.ListAPIView):
 
 class ShowClubListView(generics.ListAPIView):
     queryset = Club.objects.all()
-    serializer_class = ClubSerializer
+    serializer_class = ClubListSerializer
     ordering_fields = ['name']
     
 class ProgramListView(generics.ListAPIView):
@@ -461,23 +459,21 @@ class DietView(generics.ListAPIView):
 ###################################
 ###################################
 
-class AddEventView(generics.CreateAPIView):
-    serializer_class = CreateEventSerializer
-    queryset = Event.objects.all()
+# class CreateEventView(generics.CreateAPIView):
+#     serializer_class = CreateEventSerializer
+#     queryset = Event.objects.all()
     
-    def perform_create(self, serializer):
-        with transaction.atomic():
-            event = serializer.save(care_giver=self.request.user.user_profile.owner)
-            event.save()
+#     def perform_create(self, serializer):
+#         with transaction.atomic():
+#             event = serializer.save(care_giver=self.request.user.user_profile.owner)
+#             event.save()
 
 class CreateEventView(generics.GenericAPIView):
     serializer_class = CreateEventSerializer
 
     def get_object(self):
-        username = self.request.data.get('username')
-
         try:
-            return Owner.objects.get(user_profile__username=username)
+            return Owner.objects.get(user_profile__username=self.request.data.get('owner_username'))
         except Owner.DoesNotExist:
             return None
 
@@ -487,7 +483,7 @@ class CreateEventView(generics.GenericAPIView):
 
         owner = self.get_object()
 
-        if not owner:
+        if owner!=None:
             try:
                 with transaction.atomic():
                     valid = s.validated_data
@@ -626,17 +622,22 @@ class AddToWalletView(generics.RetrieveAPIView):
 class AddTrainerView(generics.GenericAPIView):
     serializer_class = AddTrainerSerializer
     
-    def post(self, request, *args, **kwargs):
-        print("gayidim")
-        
+    def post(self, request, *args, **kwargs):        
         username = request.data.get('owner_username')
-        owner = Owner.objects.get(user_profile__username = username)
         
         s = self.serializer_class(data=request.data)
         s.is_valid(raise_exception=True)
         valid = s.validated_data
         
-        if owner!=None:
+        try:
+            owner = Owner.objects.get(user_profile__username = username)
+        except:
+            owner = None
+        
+        if not owner:
+            return Response({'detail': _('Username not found')}, status=status.HTTP_404_NOT_FOUND)
+        
+        elif owner != None:
             user_profile = UserProfile.objects.create(
                 username = valid.get('trainer_username'),
                 password = valid.get('trainer_password'),
@@ -648,11 +649,15 @@ class AddTrainerView(generics.GenericAPIView):
             user_profile.save()
             trainer = Trainer.objects.create(user_profile = user_profile)
             trainer.save()
+            
+            club = Club.objects.get(owner = owner)
+            tcr = TCR.objects.create(club = club, trainer = trainer)
+            tcr.save()
             return Response({'detail': _('Trainer added successfully')})
         return Response({'detail': _("There was a problem with adding a trainer.")}, status=status.HTTP_400_BAD_REQUEST)
 
 class CreateProgramView(generics.GenericAPIView):
-    serializer_class = ProgramSerializer
+    serializer_class = CreateProgramSerializer
     
     def get_object(self):
         try:
@@ -721,7 +726,7 @@ class MemberProgramShowToOnwer(generics.ListAPIView):
             return None
 
 class CreateDietView(generics.GenericAPIView):
-    serializer_class = ProgramSerializer
+    serializer_class = CreateDietSerializer
     
     def get_object(self):
         try:
@@ -746,7 +751,7 @@ class CreateDietView(generics.GenericAPIView):
                 description = valid.get('description'),
                 image = valid.get('image'),
                 price = valid.get('price'),
-                day = valid.get('day'),
+                # day = valid.get('day'),
                 trainer = trainer,
                 club = club,
                 # owner = owner,
