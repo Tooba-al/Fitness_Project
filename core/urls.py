@@ -53,10 +53,11 @@ urlpatterns = [
     path('owner/mem-prog/list/<str:owner_username>/', MemberProgramShowToOnwer.as_view()),
     
     path('event/create/', CreateEventView.as_view()),
+    path('event/show/<int:event_id>/', EventView.as_view()),
+    path('event/list/', ShowEventListView.as_view()),
     # path('event/<int:event_id>/delete/', DeleteEventView.as_view()),
     path('event/<int:request_id>/register/', RejisterEventView.as_view()),
     path('event/<int:request_id>/unregister/', UnrejisterEventView.as_view()),
-    path('event/list/', ShowEventListView.as_view()),
     
     path('trainer/add/', AddTrainerView.as_view()),
     path('trainer/show/<str:username>/', TrainerView.as_view()),

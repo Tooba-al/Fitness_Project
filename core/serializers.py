@@ -225,6 +225,9 @@ class CreateEventSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=100)
     description = serializers.CharField(max_length=500)
     date = serializers.DateField()
+    hour = serializers.IntegerField(default=0)
+    minute = serializers.IntegerField(default=0)
+    duration = serializers.FloatField(default=0.0)
     capacity = serializers.IntegerField(default=0)
     attachment = serializers.ImageField(allow_null=True)
         
@@ -265,16 +268,20 @@ class EventSerializer(serializers.ModelSerializer):
     owner_data = serializers.SerializerMethodField()
     class Meta:
         model = Event
-        fields = ['id', 'owner_data', 'title','description', 'date', 'capacity', 'attachment']
+        fields = ['id', 'owner_data', 'title','description', 
+                  'date', 'hour', 'minute', 'duration', 'capacity', 'attachment']
     
     def get_owner_data(self, instance):
         _owner = instance.owner
         return OwnerSerializer(instance = _owner).data
     
-class EMRSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EMR
-        fields = []
+class EMRSerializer(serializers.Serializer):
+    event_id = serializers.IntegerField(default=0)
+    request_id = serializers.IntegerField(default=0)
+    member_username = serializers.CharField(max_length=32)
+    # class Meta:
+    #     model = EMR
+    #     fields = []
     
 class EventListSerializer(serializers.ModelSerializer):
     owner_data = serializers.SerializerMethodField()
@@ -536,6 +543,30 @@ class DMRSerializer(serializers.ModelSerializer):
     class Meta:
         model = DMR
         fields = []
+        
+class MPRListSerializer(serializers.ModelSerializer):
+    member_data = serializers.SerializerMethodField()
+    program_situation = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = MPR
+        fields = ['id', 'member_data', 'program_situation']
+        # fields = ['name', 'price', 'image']
+        
+    def get_member_data(self, instance):
+        _user_profile = instance.member.user_profile
+        _member_data = {}
+        _member_data['first_name'] = _user_profile.first_name
+        _member_data['last_name'] = _user_profile.last_name
+        return _member_data
+    
+        
+    def get_program_situation(self, instance):
+        _mpr = instance.club
+        _program_situation = {}
+        # _program_situation['owner_last'] = _club.owner..is_finished
+        return _program_situation
+    
 
 ###############################
 ###############################

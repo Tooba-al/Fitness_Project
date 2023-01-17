@@ -212,7 +212,7 @@ class Club(models.Model):
 
 class Event(models.Model):
     owner = models.ForeignKey(Owner, on_delete=models.CASCADE, related_name="send_event_owner")
-    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="receiver_event_owner")
+    # member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="receiver_event_owner")
     title = models.CharField(max_length=50)
     description = models.TextField(max_length=300)
     date = models.DateField(null = True, blank = True)

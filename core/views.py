@@ -470,37 +470,35 @@ class DietView(generics.ListAPIView):
 
 class CreateEventView(generics.GenericAPIView):
     serializer_class = CreateEventSerializer
-
+    
     def get_object(self):
         try:
-            return Owner.objects.get(user_profile__username=self.request.data.get('owner_username'))
+            return Owner.objects.get(user_profile__username = self.request.data.get('owner_username'))
         except Owner.DoesNotExist:
             return None
-
+        
     def post(self, request, *args, **kwargs):
         s = self.serializer_class(data=request.data)
         s.is_valid(raise_exception=True)
+        valid = s.validated_data
 
         owner = self.get_object()
-
         if owner!=None:
-            try:
-                with transaction.atomic():
-                    valid = s.validated_data
-                    event = Event.objects.create(
-                            owner = owner,
-                            title = valid.get("title"),  
-                            description = valid.get("description"),  
-                            date = valid.get("date"),  
-                            capacity = valid.get("capacity"),  
-                            attachment = valid.get("attachment"),
-                    )
-                    event.save()
-                    return Response({'detail': _("Event successfully created.")})
-            except:
-                return Response({'detail': _("Problem with creating the event.")}, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response({'detail': _("This profile doesn't exists.")}, status=status.HTTP_400_BAD_REQUEST)     
+            event = Event.objects.create(
+                    owner = owner,
+                    title = valid.get("title"),  
+                    description = valid.get("description"),  
+                    date = valid.get("date"),  
+                    hour = valid.get("hour"),  
+                    minute = valid.get("minute"),  
+                    duration = valid.get("duration"),  
+                    capacity = valid.get("capacity"),  
+                    attachment = valid.get("attachment"),
+            )
+            event.save()
+            return Response({'detail': _("Event successfully created.")})
+        
+        return Response({'detail': _("Problem with creating the event.")}, status=status.HTTP_400_BAD_REQUEST)
 
 class DeleteEventView(generics.DestroyAPIView):
     def delete(self, request, *args, **kwargs):
@@ -515,7 +513,7 @@ class DeleteEventView(generics.DestroyAPIView):
         except Event.DoesNotExist:
             return Response({'detail': _("This event doesn't exist.")}, status=status.HTTP_400_BAD_REQUEST)
 
-class RejisterEventView(generics.GenericAPIView):
+class RejisterEventView(generics.UpdateAPIView):
     serializer_class = EMRSerializer
 
     def put(self, request, *args, **kwargs):
@@ -661,10 +659,8 @@ class CreateProgramView(generics.GenericAPIView):
     
     def get_object(self):
         try:
-            username = self.request.data.get('owner_username')
-            owner = Owner.objects.get(user_profile__username = username)
-            return owner
-        except UserProfile.DoesNotExist:
+            return Owner.objects.get(user_profile__username = self.request.data.get('owner_username'))
+        except Owner.DoesNotExist:
             return None
     
     def put(self, request, *args, **kwargs):
@@ -713,10 +709,14 @@ class ProgramSearchView(generics.ListAPIView):
         except Program.DoesNotExist:
             return None
 
+class MPRListView(generics.ListAPIView):
+    serializer_class = MPRListSerializer
+
+
 class MemberProgramShowToOnwer(generics.ListAPIView):
     serializer_class = ProgramSerializer
     
-    def get_object(self):
+    def get_queryset(self):
         try:
             club_name = Club.objects.get(
                 owner__user_profile__username = self.kwargs['owner_username'])
@@ -961,7 +961,7 @@ class EducationLikeView(generics.CreateAPIView):
 class EducationDislikeView(generics.UpdateAPIView):
     serializer_class = EdMRSerializer
 
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         s = self.serializer_class(data=request.data)
         s.is_valid(raise_exception=True)
 
