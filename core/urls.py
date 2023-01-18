@@ -51,6 +51,7 @@ urlpatterns = [
     path('club/show/<int:club_id>/', ClubView.as_view()),
     path('club/list/', ShowClubListView.as_view()),
     path('owner/mem-prog/list/<str:owner_username>/', MemberProgramShowToOnwer.as_view()),
+    path('owner/enrollers/list/', EnrollersListView.as_view()),
     
     path('event/create/', CreateEventView.as_view()),
     path('event/show/<int:event_id>/', EventView.as_view()),

@@ -110,6 +110,11 @@ class ResendVerificationCodeSerializer(serializers.Serializer):
     
 class ForgetPasswordSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
+    
+class UserProfileIdSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['id', 'username']
    
 ##################################
 ##################################
@@ -543,15 +548,15 @@ class DMRSerializer(serializers.ModelSerializer):
     class Meta:
         model = DMR
         fields = []
-        
-class MPRListSerializer(serializers.ModelSerializer):
+      
+# Member-Club Relation
+class MCRListSerializer(serializers.ModelSerializer):
     member_data = serializers.SerializerMethodField()
-    program_situation = serializers.SerializerMethodField()
+    club_data = serializers.SerializerMethodField()
     
     class Meta:
-        model = MPR
-        fields = ['id', 'member_data', 'program_situation']
-        # fields = ['name', 'price', 'image']
+        model = MCR
+        fields = ['id', 'member_data', 'club_data']
         
     def get_member_data(self, instance):
         _user_profile = instance.member.user_profile
@@ -561,12 +566,40 @@ class MPRListSerializer(serializers.ModelSerializer):
         return _member_data
     
         
-    def get_program_situation(self, instance):
-        _mpr = instance.club
-        _program_situation = {}
-        # _program_situation['owner_last'] = _club.owner..is_finished
-        return _program_situation
+    def get_club_data(self, instance):
+        _club = instance.club
+        _owner = instance.club.owner.user_profile
+        _club_data = {}
+        _club_data['club_name'] = _club.name
+        _club_data['owner_first_name'] = _owner.first_name
+        _club_data['owner_last_name'] = _owner.last_name
+        return _club_data
+      
+# Member-Program Relation
+class MPRListSerializer(serializers.ModelSerializer):
+    member_data = serializers.SerializerMethodField()
+    program_data = serializers.SerializerMethodField()
     
+    class Meta:
+        model = MPR
+        fields = ['id', 'member_data', 'program_data', 'is_finished']
+        
+    def get_member_data(self, instance):
+        _user_profile = instance.member.user_profile
+        _member_data = {}
+        _member_data['first_name'] = _user_profile.first_name
+        _member_data['last_name'] = _user_profile.last_name
+        return _member_data
+    
+        
+    def get_program_data(self, instance):
+        _program = instance.program
+        _trainer = instance.program.trainer
+        _program_data = {}
+        _program_data['program_name'] = _program.name
+        _program_data['trainer_first_name'] = _trainer.user_profile.first_name
+        _program_data['trainer_last_name'] = _trainer.user_profile.last_name
+        return _program_data
 
 ###############################
 ###############################

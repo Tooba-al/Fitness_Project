@@ -205,7 +205,7 @@ class Club(models.Model):
     owner = models.OneToOneField(Owner, on_delete=models.CASCADE, related_name="club")
     name = models.CharField(max_length=32)
     address = models.TextField(max_length=500)
-    enrollers = models.ManyToManyField(UserProfile, related_name="enrollers", blank=True)
+    enrollers = models.ManyToManyField(UserProfile, related_name="enrollings", blank=True)
     # phone_number = models.CharField(max_length=12)
     # def __str__(self):
     #     return (self.owner.user_profile.username + " -> " + self.name)

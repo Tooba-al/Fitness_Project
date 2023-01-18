@@ -709,19 +709,17 @@ class ProgramSearchView(generics.ListAPIView):
         except Program.DoesNotExist:
             return None
 
-class MPRListView(generics.ListAPIView):
-    serializer_class = MPRListSerializer
-
-
+class EnrollersListView(generics.ListAPIView):
+    queryset = MCR.objects.all()
+    serializer_class = MCRListSerializer
+    
 class MemberProgramShowToOnwer(generics.ListAPIView):
-    serializer_class = ProgramSerializer
+    serializer_class = MPRListSerializer
     
     def get_queryset(self):
+        mpr_list = []
         try:
-            club_name = Club.objects.get(
-                owner__user_profile__username = self.kwargs['owner_username'])
-            program = Program.objects.get(club__name = club_name)
-            return MPR.objects.get(program = program)
+            return MPR.objects.filter(program__club__owner__user_profile__username = self.kwargs['owner_username'])
         except MPR.DoesNotExist:
             return None
 
