@@ -57,8 +57,8 @@ urlpatterns = [
     path('event/show/<int:event_id>/', EventView.as_view()),
     path('event/list/', ShowEventListView.as_view()),
     # path('event/<int:event_id>/delete/', DeleteEventView.as_view()),
-    path('event/<int:request_id>/register/', RejisterEventView.as_view()),
-    path('event/<int:request_id>/unregister/', UnrejisterEventView.as_view()),
+    path('event/<int:event_id>/register/', RejisterEventView.as_view()),
+    path('event/<int:event_id>/unregister/', UnrejisterEventView.as_view()),
     
     path('trainer/add/', AddTrainerView.as_view()),
     path('trainer/show/<str:username>/', TrainerView.as_view()),
@@ -75,6 +75,7 @@ urlpatterns = [
     path('diet/show/<int:diet_id>/', DietView.as_view()),
     
     path('education/create/', CreateEducationView.as_view()),
+    path('education/list/', EducationListView.as_view()),
     # path('education/<int:education_id>/delete/', DeleteEducationView.as_view()),
     path('education/<int:education_id>/like/', EducationLikeView.as_view()),
     path('education/<int:education_id>/dislike/', EducationDislikeView.as_view()),

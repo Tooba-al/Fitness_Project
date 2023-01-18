@@ -330,11 +330,11 @@ class Education(models.Model):
 
     @property
     def likes_count(self):
-        return EMR.objects.filter(education = self, isLiked = True).count()
+        return EdMR.objects.filter(education = self, isLiked = True).count()
 
     def is_liked(self, member):
         try:
-            if EMR.objects.get(member = member, education = self, isLiked = True):
+            if EdMR.objects.get(member = member, education = self, isLiked = True):
                 return True
         except:
             return False

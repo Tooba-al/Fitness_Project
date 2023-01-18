@@ -901,86 +901,89 @@ class EnrollToDietView(generics.GenericAPIView):
 
 # Bonus Part
 
-class CreateEducationView(generics.CreateAPIView):
-    serializer_class = EducationCreateSerializer
-    queryset = Education.objects.all()
+class CreateEducationView(generics.GenericAPIView):
+    serializer_class = CreateEducationSerializer
+    
+    def get_object(self):
+        try:
+            return Trainer.objects.get(user_profile__username = self.request.data.get('trainer_username'))
+        except Trainer.DoesNotExist:
+            return None
+        
+    def post(self, request, *args, **kwargs):
+        s = self.serializer_class(data=request.data)
+        s.is_valid(raise_exception=True)
+        valid = s.validated_data
 
-    def perform_create(self, serializer):
-        with transaction.atomic():
-            education = serializer.save(trainer=self.request.user.user_profile.trainer)
+        trainer = self.get_object()
+        print(trainer)
+        if trainer!=None:
+            education = Education.objects.create(
+                    trainer = trainer,
+                    name = valid.get("name"),
+                    text = valid.get("text"),
+                    image = valid.get("image"),
+            )
             education.save()
+            return Response({'detail': _("Education successfully created.")})
+        
+        return Response({'detail': _("Problem with creating the education.")}, status=status.HTTP_400_BAD_REQUEST)
 
-class EducationView(generics.RetrieveAPIView):
-    queryset = Education.objects.all()
+class EducationView(generics.ListAPIView):
     serializer_class = EducationSerializer
     lookup_field = 'id'
     lookup_url_kwarg = 'education_id'
-
-class DeleteEducationView(generics.DestroyAPIView):
-    def delete(self, request, *args, **kwargs):
-
+    
+    def get_queryset(self):
+        id = self.kwargs['education_id']
         try:
-            with transaction.atomic():
-                education_id = self.kwargs['education_id']
-                education = Education.objects.get(id = education_id)
-                education.delete()
-                return Response({'detail': _("Education deleted.")}, status=status.HTTP_200_OK)
-
+            return [Education.objects.filter(id = id)][0]
         except Education.DoesNotExist:
-            return Response({'detail': _("This Education doesn't exist.")}, status=status.HTTP_400_BAD_REQUEST)
+            return None
+    
+class EducationListView(generics.ListAPIView):
+    queryset = Education.objects.all()
+    serializer_class = EducationSerializer
 
-# class FeedPageForEducationView(generics.ListAPIView):
-#     pass
-
-class EducationLikeView(generics.CreateAPIView):
+class EducationLikeView(generics.UpdateAPIView):
     serializer_class = EdMRSerializer
 
     def post(self, request, *args, **kwargs):
         s = self.serializer_class(data=request.data)
         s.is_valid(raise_exception=True)
+        valid = s.validated_data
 
         try:
-            with transaction.atomic():
-                valid = s.validated_data
-                member = self.request.user.user_profile
-                education_id = self.kwargs['education_id']
-                education =  Education.objects.get(id = education_id)
-
-                emr = EdMR.objects.get_or_create(
-                    education = education,
-                    member = member,
-                )
-                emr[0].isLiked = True
-                emr[0].save()
-                return Response({'detail': _("You liked the education.")}, status=status.HTTP_200_OK)
+            member = Member.objects.get(user_profile__username = valid.get('member_username'))
+            education =  Education.objects.get(id = self.kwargs['education_id'])
+            emr = EdMR.objects.get_or_create(
+                education = education,
+                member = member,
+            )
+            emr[0].isLiked = True
+            emr[0].save()
+            return Response({'detail': _("You liked the education.")}, status=status.HTTP_200_OK)
         except:
             return Response({'detail': _("There was a problem with liking the education.")}, status=status.HTTP_400_BAD_REQUEST)
 
-class EducationDislikeView(generics.UpdateAPIView):
+class EducationDislikeView(generics.CreateAPIView):
     serializer_class = EdMRSerializer
 
-    def put(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         s = self.serializer_class(data=request.data)
         s.is_valid(raise_exception=True)
+        valid = s.validated_data
 
         try:
-            with transaction.atomic():
-                valid = s.validated_data
-                member = self.request.user.user_profile
-                education_id = self.kwargs['education_id']
-                education =  Education.objects.get(id = education_id)
-
-                emr = EdMR.objects.get(
-                    education = education,
-                    member = member,
-                )
-
-                emr.isLiked = False
-                emr.save()
-                if(emr.isLiked == False):
-                    emr.delete()
-
-                return Response({'detail': _("You disliked the education.")}, status=status.HTTP_200_OK)
+            member = Member.objects.get(user_profile__username = valid.get('member_username'))
+            education =  Education.objects.get(id = self.kwargs['education_id'])
+            emr = EdMR.objects.get(
+                education = education,
+                member = member,
+            )
+            emr.isLiked = False
+            emr.save()
+            return Response({'detail': _("You disliked the education.")}, status=status.HTTP_200_OK)
         except:
             return Response({'detail': _("There was a problem with disliking the education.")}, status=status.HTTP_400_BAD_REQUEST)
 
