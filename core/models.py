@@ -293,7 +293,7 @@ class EMR(models.Model):
     
     def __str__(self):
         return (self.member.user_profile.username + "->" + 
-                self.event.name + " : " + self.isRegistered)
+                self.event.title + " : " + str(self.isRegistered))
     
 # Member-Program Relation
 class MPR(models.Model):

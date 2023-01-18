@@ -280,9 +280,8 @@ class EventSerializer(serializers.ModelSerializer):
         _owner = instance.owner
         return OwnerSerializer(instance = _owner).data
     
+# Event-Member Relation
 class EMRSerializer(serializers.Serializer):
-    event_id = serializers.IntegerField(default=0)
-    request_id = serializers.IntegerField(default=0)
     member_username = serializers.CharField(max_length=32)
     
 class EventListSerializer(serializers.ModelSerializer):
@@ -294,6 +293,28 @@ class EventListSerializer(serializers.ModelSerializer):
     def get_owner_data(self, instance):
         _owner = instance.owner
         return OwnerListSerializer(instance = _owner).data
+    
+class RegisterationSerializer(serializers.ModelSerializer):
+    member_data = serializers.SerializerMethodField()
+    event_data = serializers.SerializerMethodField()
+    class Meta:
+        model = EMR
+        fields = ['id', 'member_data', 'event_data', 'isRegistered']
+    
+    def get_member_data(self, instance):
+        _member = instance.member
+        _user_profile = _member.user_profile
+        _profile_data = {}
+        _profile_data['first_name'] = _user_profile.first_name
+        _profile_data['last_name'] = _user_profile.last_name
+        return _profile_data
+    
+    def get_event_data(self, instance):
+        _event = instance.event
+        _event_data = {}
+        _event_data['title'] = _event.title
+        _event_data['capacity'] = _event.capacity
+        return _event_data
     
 class ClubSerializer(serializers.ModelSerializer):
     owner_data = serializers.SerializerMethodField()
@@ -353,11 +374,6 @@ class CreateProgramSerializer(serializers.Serializer):
     price = serializers.IntegerField(default = 0)
     image = serializers.ImageField(allow_null=True)
     
-    # class Meta:
-    #     model = Program
-    #     fields = ['id', 'name', 'price', 'image']
-        # fields = ['name', 'price', 'image']
-        
 class ProgramSerializer(serializers.ModelSerializer):
     trainer_data = serializers.SerializerMethodField()
     club_data = serializers.SerializerMethodField()
@@ -410,34 +426,6 @@ class ProgramListSerializer(serializers.ModelSerializer):
         _club_data['name'] = _club.name
         _club_data['address'] = _club.address
         return _club_data
-    
-# class MemberProgramShowToOwnerSerializer(serializers.Serializer):
-#     club_name = serializers.CharField(max_length = 32)
-#     member_data = serializers.SerializerMethodField()
-#     program_data = serializers.SerializerMethodField()
-    
-#     class Meta:
-#         model = Program
-#         fields = ['id', 'club_name', 'member_data', 'program_data']
-#         # fields = ['name', 'price', 'image']
-        
-#     def get_member_data(self, instance):
-#         _user_profile = instance.member.user_profile
-#         _member_data = {}
-#         _member_data['first_name'] = _user_profile.first_name
-#         _member_data['last_name'] = _user_profile.last_name
-#         _member_data['height'] = _user_profile.height
-#         _member_data['weight'] = _user_profile.weight
-#         _member_data['sex'] = _user_profile.sex
-#         return _member_data
-        
-#     def get_program_data(self, instance):
-#         _program = instance.program
-#         _program_data = {}
-#         _program_data['name'] = _program.name
-#         _program_data['trainer'] = _program.trainer.username
-#         _program_data['club'] = _program.club.name
-#         return _program_data
 
 class CreateDietSerializer(serializers.Serializer):
     owner_username = serializers.CharField(max_length=32)
@@ -526,12 +514,6 @@ class TCRSerializer(serializers.ModelSerializer):
 class MCRSerializer(serializers.ModelSerializer):
     class Meta:
         model = MCR
-        fields = []
-        
-# Event-Member Relation
-class EMRSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EMR
         fields = []
 
 # Member-Program Relation
@@ -634,7 +616,3 @@ class CreateEducationSerializer(serializers.Serializer):
 # Education-Member Relation
 class EdMRSerializer(serializers.Serializer):
     member_username = serializers.CharField(max_length=32)
-    # education_id = serializers.IntegerField(default=0)
-    # class Meta:
-    #     model = EdMR
-    #     fields = []

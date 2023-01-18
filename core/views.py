@@ -459,15 +459,6 @@ class DietView(generics.ListAPIView):
 ###################################
 ###################################
 
-# class CreateEventView(generics.CreateAPIView):
-#     serializer_class = CreateEventSerializer
-#     queryset = Event.objects.all()
-    
-#     def perform_create(self, serializer):
-#         with transaction.atomic():
-#             event = serializer.save(care_giver=self.request.user.user_profile.owner)
-#             event.save()
-
 class CreateEventView(generics.GenericAPIView):
     serializer_class = CreateEventSerializer
     
@@ -500,58 +491,57 @@ class CreateEventView(generics.GenericAPIView):
         
         return Response({'detail': _("Problem with creating the event.")}, status=status.HTTP_400_BAD_REQUEST)
 
-class DeleteEventView(generics.DestroyAPIView):
-    def delete(self, request, *args, **kwargs):
-
-        try:
-            with transaction.atomic():
-                event_id = self.kwargs['event_id']
-                event = Event.objects.get(id = event_id)
-                event.delete()
-                return Response({'detail': _("Event deleted.")}, status=status.HTTP_200_OK)
-
-        except Event.DoesNotExist:
-            return Response({'detail': _("This event doesn't exist.")}, status=status.HTTP_400_BAD_REQUEST)
-
-class RejisterEventView(generics.UpdateAPIView):
+class RegisterEventView(generics.UpdateAPIView):
     serializer_class = EMRSerializer
 
-    def put(self, request, *args, **kwargs):
-        user_request_data = self.serializer_class(data=request.data)
-        user_request_data.is_valid(raise_exception=True)
-    
+    def post(self, request, *args, **kwargs):
+        s = self.serializer_class(data=request.data)
+        s.is_valid(raise_exception=True)
+        valid = s.validated_data
+
         try:
-            with transaction.atomic():
-                member = self.request.user.user_profile.member
-                event_id = self.kwargs['request_id']
-                event = Event.objects.get(id = event_id)
-                emr = EMR.objects.get(event = event, member = member)
-                emr.isRegistered = True
-                emr.save()
-                    
-                return Response({'detail': _("You registered to this event.")}, status=status.HTTP_200_OK)
+            member = Member.objects.get(user_profile__username = valid.get('member_username'))
+            event = Event.objects.get(id = self.kwargs['event_id'])
+            event.capacity -= 1
+            event.save()
+            emr = EMR.objects.get_or_create(
+                event = event, 
+                member = member
+            )
+            emr[0].isRegistered = True
+            emr[0].save()
+            
+            return Response({'detail': _("You registered to this event.")}, status=status.HTTP_200_OK)
         except:
             return Response({'detail': _("There was a problem with registering to this event.")}, status=status.HTTP_400_BAD_REQUEST)
 
-class UnrejisterEventView(generics.GenericAPIView):
+class UnregisterEventView(generics.UpdateAPIView):
     serializer_class = EMRSerializer
 
-    def put(self, request, *args, **kwargs):
-        user_request_data = self.serializer_class(data=request.data)
-        user_request_data.is_valid(raise_exception=True)
-        
+    def post(self, request, *args, **kwargs):
+        s = self.serializer_class(data=request.data)
+        s.is_valid(raise_exception=True)
+        valid = s.validated_data
+
         try:
-            with transaction.atomic():
-                member = self.request.user.user_profile.member
-                event_id = self.kwargs['request_id']
-                event = Event.objects.get(id = event_id)
-                emr = EMR.objects.get(event = event, member = member)
-                emr.isRegistered = False
-                emr.save()
-                    
-                return Response({'detail': _("You registered to this event.")}, status=status.HTTP_200_OK)
+            member = Member.objects.get(user_profile__username = valid.get('member_username'))
+            event = Event.objects.get(id = self.kwargs['event_id'])
+            event.capacity += 1
+            event.save()
+            emr = EMR.objects.get(
+                event = event, 
+                member = member
+            )
+            emr.isRegistered = False
+            emr.save()
+                
+            return Response({'detail': _("You unregistered to this event.")}, status=status.HTTP_200_OK)
         except:
-            return Response({'detail': _("There was a problem with registering to this event.")}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': _("There was a problem with unregistering to this event.")}, status=status.HTTP_400_BAD_REQUEST)
+
+class ShowEventRegistrationListView(generics.ListAPIView):
+    queryset = EMR.objects.all()
+    serializer_class = RegisterationSerializer
 
 class ShowEventListView(generics.ListAPIView):
     queryset = Event.objects.all()
