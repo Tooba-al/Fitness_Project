@@ -40,7 +40,7 @@ class UserSignUpView(generics.GenericAPIView):
                 valid = s.validated_data
                 hash = make_password(valid.get("password"))
                 user_profile = UserProfile.objects.create(username = valid.get('username'),
-                                                        password = hash,
+                                                        password = valid.get('username'),
                                                         email = valid.get('email'),
                                                         first_name = valid.get('first_name'),
                                                         last_name = valid.get('last_name'),                                                
@@ -86,12 +86,11 @@ class OwnerSignUpView(generics.GenericAPIView):
         user_profile = self.get_object()
 
         if not user_profile:
-            # try:
             with transaction.atomic():
                 valid = s.validated_data
                 hash = make_password(valid.get("password"))
                 user_profile = UserProfile.objects.create(username = valid.get('username'),
-                                                        password = hash,
+                                                        password = valid.get('username'),
                                                         email = valid.get('email'),
                                                         first_name = valid.get('first_name'),
                                                         last_name = valid.get('last_name'),                                                
@@ -145,7 +144,7 @@ class UserProfileAuthTokenView(generics.CreateAPIView):
         token, created = Token.objects.get_or_create(user=user)
         user.save()
         
-        return Response({'detail': user, 'token': token})
+        return Response({'detail': _('You are verified.'), 'token': token.key})
 
 class RetrieveUserProfileDataView(generics.RetrieveAPIView):
     serializer_class = UserProfileDataSerializer
@@ -221,10 +220,11 @@ class RetrieveUserProfileEditView(generics.RetrieveUpdateAPIView):
 #         return Response({'detail': _('You are verified.'), 'token': token.key})
 
 class LoginView(generics.GenericAPIView):
-    
+
     serializer_class = LoginSerializer
 
     def post(self, request, *args, **kwargs):
+
         username = request.data.get('username')
         password = request.data.get('password')
 
@@ -235,16 +235,14 @@ class LoginView(generics.GenericAPIView):
 
         if not user_profile:
             return Response({'detail': _('Username not found')}, status=status.HTTP_404_NOT_FOUND)
-        try:
-            if (password == user_profile.password):
-                token = Token.objects.get(user=user_profile.user)
-                data = UserProfileDataSerializer(instance = user_profile).data
-                return Response({'data': data, 'token': token.key})
-            else:
-                return Response({'detail': _('Wrong password'),}, status=status.HTTP_404_NOT_FOUND)
-        except:
-            return Response({'detail': _('You may not be verified yet.'),}, status=status.HTTP_404_NOT_FOUND)
-        
+
+        if(password == user_profile.password):
+            token = Token.objects.get_or_create(user=user_profile.user)[0]
+            data = UserProfileDataSerializer(instance = user_profile).data
+            return Response({'data': data, 'token': token.key})
+        else:
+            return Response({'detail': _('Wrong password'),}, status=status.HTTP_404_NOT_FOUND)
+
 class ForgetPasswordView(generics.CreateAPIView):
 
     serializer_class = ForgetPasswordSerializer
