@@ -236,7 +236,7 @@ class LoginView(generics.GenericAPIView):
         if not user_profile:
             return Response({'detail': _('Username not found')}, status=status.HTTP_404_NOT_FOUND)
         try:
-            if(check_password(password, user_profile.password)):
+            if (password == user_profile.password):
                 token = Token.objects.get(user=user_profile.user)
                 data = UserProfileDataSerializer(instance = user_profile).data
                 return Response({'data': data, 'token': token.key})
