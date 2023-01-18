@@ -59,7 +59,8 @@ urlpatterns = [
     # path('event/<int:event_id>/delete/', DeleteEventView.as_view()),
     path('event/register/<int:event_id>/', RegisterEventView.as_view()),
     path('event/unregister/<int:event_id>/', UnregisterEventView.as_view()),
-    path('event/registerations/', ShowEventRegistrationListView.as_view()),
+    path('event/registerations/', ShowEventRegistrationListView
+         .as_view()),
     
     path('trainer/add/', AddTrainerView.as_view()),
     path('trainer/show/<str:username>/', TrainerView.as_view()),

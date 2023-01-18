@@ -124,6 +124,29 @@ class OwnerSignUpView(generics.GenericAPIView):
 
         return Response({'detail': _("This profile already exists.")}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class UserProfileAuthTokenView(generics.CreateAPIView):
+    """
+        match phone number and verification code
+        return user token on success
+    """
+
+    serializer_class = UserProfileDataSerializer
+
+    def post(self, request, *args, **kwargs):
+
+        email = request.data.get('email')
+        
+        user = User.objects.get(email=email)
+        
+        if not user:
+            return Response({'detail': _('Email not found')}, status=status.HTTP_404_NOT_FOUND)
+        
+        token, created = Token.objects.get_or_create(user=user)
+        user.save()
+        
+        return Response({'detail': user, 'token': token})
+
 class RetrieveUserProfileDataView(generics.RetrieveAPIView):
     serializer_class = UserProfileDataSerializer
 
@@ -198,7 +221,7 @@ class RetrieveUserProfileEditView(generics.RetrieveUpdateAPIView):
 #         return Response({'detail': _('You are verified.'), 'token': token.key})
 
 class LoginView(generics.GenericAPIView):
-
+    
     serializer_class = LoginSerializer
 
     def post(self, request, *args, **kwargs):
@@ -213,15 +236,16 @@ class LoginView(generics.GenericAPIView):
 
         if not user_profile:
             return Response({'detail': _('Username not found')}, status=status.HTTP_404_NOT_FOUND)
-        # try:
-        if(check_password(password, user_profile.password)):
-            token = Token.objects.get(user=user_profile.user)
-            data = UserProfileDataSerializer(instance = user_profile).data
-            return Response({'data': data, 'token': token.key})
-            # return Response({'data': data,})
-        else:
-            return Response({'detail': _('Wrong password'),}, status=status.HTTP_404_NOT_FOUND)
-
+        try:
+            if(check_password(password, user_profile.password)):
+                token = Token.objects.get(user=user_profile.user)
+                data = UserProfileDataSerializer(instance = user_profile).data
+                return Response({'data': data, 'token': token.key})
+            else:
+                return Response({'detail': _('Wrong password'),}, status=status.HTTP_404_NOT_FOUND)
+        except:
+            return Response({'detail': _('You may not be verified yet.'),}, status=status.HTTP_404_NOT_FOUND)
+        
 class ForgetPasswordView(generics.CreateAPIView):
 
     serializer_class = ForgetPasswordSerializer
