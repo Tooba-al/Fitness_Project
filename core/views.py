@@ -151,11 +151,7 @@ class RetrieveUserProfileDataView(generics.RetrieveAPIView):
 
     def get_object(self):
         try:
-            # username = self.kwargs['username']
-            # username = self.request.data.get('username')
-            # user_profile = UserProfile.objects.get(username = username)
-            # return UserProfileDataSerializer(instance = user_profile).data
-            return (self.request.user)
+            return self.request.user.user_profile
         except UserProfile.DoesNotExist:
             return None
 
