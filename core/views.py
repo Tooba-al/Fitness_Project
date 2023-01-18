@@ -225,7 +225,6 @@ class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
 
     def post(self, request, *args, **kwargs):
-
         username = request.data.get('username')
         password = request.data.get('password')
 
