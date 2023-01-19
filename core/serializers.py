@@ -349,7 +349,7 @@ class AddToWalletSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Member
-        fields = ['id', 'wallet_data', 'amount']
+        # fields = ['id', 'wallet_data', 'amount']
         fields = ['id', 'wallet_data', 'username', 'amount']
         
     def get_wallet_data(self, instance):
@@ -631,7 +631,7 @@ class CouponSerializer(serializers.ModelSerializer):
     club_data = serializers.SerializerMethodField()
     class Meta:
         model = Coupon
-        fields = ['id', 'member_data', 'club_data']
+        fields = ['id', 'member_data', 'club_data', 'percentage']
         
     def get_member_data(self, instance):
         _user_profile = instance.member.user_profile
@@ -645,3 +645,14 @@ class CouponSerializer(serializers.ModelSerializer):
         _club_data = {}
         _club_data['name'] = _club.name
         return _club_data
+
+class CreateCouponSerializer(serializers.Serializer):
+    member_username = serializers.CharField(max_length=32)
+    percentage = serializers.IntegerField(default=0)
+
+class EnterCouponSerializer(serializers.Serializer):
+    member_username = serializers.CharField(max_length=32)
+    item_name = serializers.CharField(max_length=32)
+
+    
+    

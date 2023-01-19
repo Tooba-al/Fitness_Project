@@ -77,6 +77,11 @@ urlpatterns = [
     path('blog/feed/<str:member_username>/', FeedPageView.as_view()),
     path('blog/show/<int:blog_id>/', BlogView.as_view()),
     
+    path('coupon/create/<club_id>/', CreateCouponView.as_view()),
+    path('coupon/list/', CouponListView.as_view()),
+    path('coupon/show/<int:coupon_id>/', ShowCouponView.as_view()),
+    path('coupon/enter/<int:coupon_id>/', EnterCouponView.as_view()),
+    
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),

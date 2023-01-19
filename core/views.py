@@ -38,6 +38,7 @@ class UserSignUpView(generics.GenericAPIView):
             # try:
             with transaction.atomic():
                 valid = s.validated_data
+                # hash = make_password(valid.get("password"))
                 hash = make_password(valid.get("password"))
                 user_profile = UserProfile.objects.create(username = valid.get('username'),
                                                         password = valid.get('username'),
@@ -169,13 +170,13 @@ class RetrieveUserProfileEditView(generics.RetrieveUpdateAPIView):
             return None
 
 class LoginView(generics.GenericAPIView):
-
     serializer_class = LoginSerializer
 
     def post(self, request, *args, **kwargs):
 
         username = request.data.get('username')
         password = request.data.get('password')
+        # password = make_password(request.data.get('password'))
 
         try:
             user_profile = UserProfile.objects.get(username = username)
@@ -185,6 +186,8 @@ class LoginView(generics.GenericAPIView):
         if not user_profile:
             return Response({'detail': _('Username not found')}, status=status.HTTP_404_NOT_FOUND)
 
+        print(password)
+        print(user_profile.password)
         if(password == user_profile.password):
             token = Token.objects.get_or_create(user=user_profile.user)[0]
             data = UserProfileDataSerializer(instance = user_profile).data
@@ -980,13 +983,95 @@ class BlogSearchView(generics.ListAPIView):
             return Blog.objects.filter(text__icontains = text)
         except Blog.DoesNotExist:
             return None
+       
+class CreateCouponView(generics.GenericAPIView):
+    serializer_class = CreateCouponSerializer
+    
+    def get_object(self):
+        try:
+            return Club.objects.get(id = self.kwargs['club_id'])
+        except Club.DoesNotExist:
+            return None
         
+    def post(self, request, *args, **kwargs):
+        s = self.serializer_class(data=request.data)
+        s.is_valid(raise_exception=True)
+        valid = s.validated_data
+
+        club = self.get_object()
+        if club!=None:
+            member = Member.objects.get(
+                        user_profile__username=valid.get("member_username"))
+            coupon = Coupon.objects.create(
+                    club = club,
+                    member = member,
+                    percentage = valid.get("percentage"),
+            )
+            coupon.save()
+            return Response({'detail': _("Coupon successfully created.")})
+        
+        return Response({'detail': _("Problem with creating the Coupon.")}, status=status.HTTP_400_BAD_REQUEST)
+     
 class CouponListView(generics.ListAPIView):
     queryset = Coupon.objects.all()
     serializer_class = CouponSerializer
     
-class CreateCouponView(generics.GenericAPIView):
-    pass
-
+class ShowCouponView(generics.ListAPIView):
+    serializer_class = CouponSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'coupon_id'
+    
+    def get_queryset(self):
+        id = self.kwargs['coupon_id']
+        try:
+            return [Coupon.objects.filter(id = id)][0]
+        except Coupon.DoesNotExist:
+            return None
+    
 class EnterCouponView(generics.RetrieveAPIView):
-    pass
+    serializer_class = EnterCouponSerializer
+
+    def get_object(self):
+        try:
+            return Coupon.objects.get(id = self.kwargs['coupon_id'])
+        except Coupon.DoesNotExist:
+            return None
+
+    def put(self, request, *args, **kwargs):
+        user_profile = self.get_object()
+        user_request_data = self.serializer_class(data=request.data)
+        user_request_data.is_valid(raise_exception=True)
+        
+        print(user_profile)
+        s = self.serializer_class(data=request.data)
+        s.is_valid(raise_exception=True)
+        valid = s.validated_data
+        
+        # coupon = self.get_object()
+        coupon = Coupon.objects.get(id = self.kwargs['coupon_id'])
+        print(coupon)
+        try:
+            print(valid.get('member_username'))
+            member = Member.objects.get(user_profile = user_profile)
+            # member = Member.objects.get(
+            #         user_profile__usrename=valid.get('member_username'))
+            print(member)
+            print(coupon.member)
+            if (coupon.member == member):
+                print("yes")
+                program = Program.objects.get(name=valid.get('item_name'))
+                diet = Diet.objects.get(name=valid.get('item_name'))
+                
+                if program!=None:
+                    program.price -= (program.price*coupon.percentage)/100
+                    program.price.save()
+                    return Response({'detail': _("This coupon successfuly used.")}, status=status.HTTP_200_OK)
+                
+                elif diet!=None:
+                    diet.price -= (diet.price*coupon.percentage)/100
+                    diet.price.save()
+                    return Response({'detail': _("This coupon successfuly used.")}, status=status.HTTP_200_OK)
+            else:
+                return Response({'detail': _("This user can't user this coupon.")}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({'detail': _("There was a problem with using this coupon.")}, status=status.HTTP_400_BAD_REQUEST)
