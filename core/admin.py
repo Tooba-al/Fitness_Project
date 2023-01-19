@@ -20,7 +20,7 @@ admin.site.register(Diet)
 admin.site.register(DMR)        # Diet-Member Relation
 
 # Bounus Part
-admin.site.register(Education)
-admin.site.register(EdMR)        # Education-Member Relation
+admin.site.register(Blog)
+admin.site.register(BMR)        # Blog-Member Relation
 
 

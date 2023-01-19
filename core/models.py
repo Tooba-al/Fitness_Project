@@ -321,8 +321,8 @@ class DMR(models.Model):
 
 # Bounus Part
 
-class Education(models.Model):
-    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="educations", default = None)
+class Blog(models.Model):
+    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="Blogs", default = None)
     name = models.CharField(max_length=100, null=True)
     text = models.TextField(blank=True, null=True)
     image = models.ImageField(blank=True, null=True)
@@ -330,22 +330,22 @@ class Education(models.Model):
 
     @property
     def likes_count(self):
-        return EdMR.objects.filter(education = self, isLiked = True).count()
+        return BMR.objects.filter(blog = self, isLiked = True).count()
 
     def is_liked(self, member):
         try:
-            if EdMR.objects.get(member = member, education = self, isLiked = True):
+            if BMR.objects.get(member = member, blog = self, isLiked = True):
                 return True
         except:
             return False
 
-# Education-Member Relation
-class EdMR(models.Model):
-    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="EdMR_member")
-    education = models.ForeignKey(Education, on_delete=models.CASCADE, related_name="EdMR_education")
+# Blog-Member Relation
+class BMR(models.Model):
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="BMR_member")
+    blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name="BMR_blog")
     isLiked = models.BooleanField(default = False)
     created_at = models.DateTimeField(auto_now_add=True)
     
-    # def __str__(self):
-    #     return (self.member.user_profile.username + "->" + 
-    #             self.education.name)
+    def __str__(self):
+        return (self.member.user_profile.username + "->" + 
+                self.blog.name)

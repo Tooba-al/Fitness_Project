@@ -151,7 +151,7 @@ class RetrieveUserProfileDataView(generics.RetrieveAPIView):
 
     def get_object(self):
         try:
-            return self.request.user.user_profile
+            return self.request.user
         except UserProfile.DoesNotExist:
             return None
 
@@ -167,53 +167,6 @@ class RetrieveUserProfileEditView(generics.RetrieveUpdateAPIView):
             return (self.request.user)
         except UserProfile.DoesNotExist:
             return None
-
-# class UserProfileAuthTokenView(generics.CreateAPIView):
-#     """
-#         match Email and verification code
-#         return user token on success
-#     """
-
-#     serializer_class = UserProfileEmailVerificationSerializer
-
-#     def post(self, request, *args, **kwargs):
-
-#         email = request.data.get('email')
-#         code = request.data.get('code')
-
-#         user_profile_email_ = UserProfileEmailVerification.objects.order_by('created_at'). \
-#             filter(
-#             query_times__lt=UserProfileEmailVerification.MAX_QUERY,
-#             used=False,
-#             burnt=False,
-#             user_profile__email=email
-#         )
-#         user_profile_email = user_profile_email_.last()
-
-#         if not user_profile_email:
-#             return Response({'detail': _('Email not found')}, status=status.HTTP_404_NOT_FOUND)
-
-#         if code != user_profile_email.code:
-#             user_profile_email.query_times += 1
-#             user_profile_email.save()
-
-#             return Response({'detail': _('Invalid verification code'),
-#                              'allowed_retry_times':
-#                                  UserProfileEmailVerification.MAX_QUERY -
-#                                  user_profile_email.query_times},
-#                             status=status.HTTP_403_FORBIDDEN)
-
-#         user_profile_email.user_profile.save()
-#         token, created = Token.objects.get_or_create(user=user_profile_email.user_profile.user)
-
-#         user_profile_email.used = True
-#         user_profile_email.save()
-
-#         # mark all other codes as burnt
-#         user_profile_email_.update(burnt=True)
-
-#         #return Response({'phone_number': phone, 'token': token.key})
-#         return Response({'detail': _('You are verified.'), 'token': token.key})
 
 class LoginView(generics.GenericAPIView):
 
@@ -652,11 +605,13 @@ class AddTrainerView(generics.GenericAPIView):
                 user = User.objects.create(username=valid.get('trainer_username'))
             )
             user_profile.save()
+            
             trainer = Trainer.objects.create(user_profile = user_profile)
             trainer.save()
-            
+    
             club = Club.objects.get(owner = owner)
-            tcr = TCR.objects.create(club = club, trainer = trainer)
+            tcr = TCR.objects.create(club = club, 
+                                     trainer = trainer)
             tcr.save()
             return Response({'detail': _('Trainer added successfully')})
         return Response({'detail': _("There was a problem with adding a trainer.")}, status=status.HTTP_400_BAD_REQUEST)
@@ -908,12 +863,13 @@ class EnrollToDietView(generics.GenericAPIView):
 
 # Bonus Part
 
-class CreateEducationView(generics.GenericAPIView):
-    serializer_class = CreateEducationSerializer
+class CreateBlogView(generics.GenericAPIView):
+    serializer_class = CreateBlogSerializer
     
     def get_object(self):
         try:
-            return Trainer.objects.get(user_profile__username = self.request.data.get('trainer_username'))
+            return Trainer.objects.get(
+                user_profile__username = self.request.data.get('trainer_username'))
         except Trainer.DoesNotExist:
             return None
         
@@ -923,37 +879,36 @@ class CreateEducationView(generics.GenericAPIView):
         valid = s.validated_data
 
         trainer = self.get_object()
-        print(trainer)
         if trainer!=None:
-            education = Education.objects.create(
+            blog = Blog.objects.create(
                     trainer = trainer,
                     name = valid.get("name"),
                     text = valid.get("text"),
                     image = valid.get("image"),
             )
-            education.save()
-            return Response({'detail': _("Education successfully created.")})
+            blog.save()
+            return Response({'detail': _("Blog successfully created.")})
         
-        return Response({'detail': _("Problem with creating the education.")}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': _("Problem with creating the Blog.")}, status=status.HTTP_400_BAD_REQUEST)
 
-class EducationView(generics.ListAPIView):
-    serializer_class = EducationSerializer
+class BlogView(generics.ListAPIView):
+    serializer_class = BlogSerializer
     lookup_field = 'id'
-    lookup_url_kwarg = 'education_id'
+    lookup_url_kwarg = 'blog_id'
     
     def get_queryset(self):
-        id = self.kwargs['education_id']
+        id = self.kwargs['blog_id']
         try:
-            return [Education.objects.filter(id = id)][0]
-        except Education.DoesNotExist:
+            return [Blog.objects.filter(id = id)][0]
+        except Blog.DoesNotExist:
             return None
     
-class EducationListView(generics.ListAPIView):
-    queryset = Education.objects.all()
-    serializer_class = EducationSerializer
+class BlogListView(generics.ListAPIView):
+    queryset = Blog.objects.all()
+    serializer_class = BlogSerializer
 
-class EducationLikeView(generics.UpdateAPIView):
-    serializer_class = EdMRSerializer
+class BlogLikeView(generics.UpdateAPIView):
+    serializer_class = BMRSerializer
 
     def post(self, request, *args, **kwargs):
         s = self.serializer_class(data=request.data)
@@ -962,19 +917,19 @@ class EducationLikeView(generics.UpdateAPIView):
 
         try:
             member = Member.objects.get(user_profile__username = valid.get('member_username'))
-            education =  Education.objects.get(id = self.kwargs['education_id'])
-            emr = EdMR.objects.get_or_create(
-                education = education,
+            Blog =  Blog.objects.get(id = self.kwargs['blog_id'])
+            emr = BMR.objects.get_or_create(
+                Blog = Blog,
                 member = member,
             )
             emr[0].isLiked = True
             emr[0].save()
-            return Response({'detail': _("You liked the education.")}, status=status.HTTP_200_OK)
+            return Response({'detail': _("You liked the Blog.")}, status=status.HTTP_200_OK)
         except:
-            return Response({'detail': _("There was a problem with liking the education.")}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': _("There was a problem with liking the Blog.")}, status=status.HTTP_400_BAD_REQUEST)
 
-class EducationDislikeView(generics.CreateAPIView):
-    serializer_class = EdMRSerializer
+class BlogDislikeView(generics.CreateAPIView):
+    serializer_class = BMRSerializer
 
     def post(self, request, *args, **kwargs):
         s = self.serializer_class(data=request.data)
@@ -983,36 +938,45 @@ class EducationDislikeView(generics.CreateAPIView):
 
         try:
             member = Member.objects.get(user_profile__username = valid.get('member_username'))
-            education =  Education.objects.get(id = self.kwargs['education_id'])
-            emr = EdMR.objects.get(
-                education = education,
+            Blog =  Blog.objects.get(id = self.kwargs['blog_id'])
+            emr = BMR.objects.get(
+                Blog = Blog,
                 member = member,
             )
             emr.isLiked = False
             emr.save()
-            return Response({'detail': _("You disliked the education.")}, status=status.HTTP_200_OK)
+            return Response({'detail': _("You disliked the Blog.")}, status=status.HTTP_200_OK)
         except:
-            return Response({'detail': _("There was a problem with disliking the education.")}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': _("There was a problem with disliking the Blog.")}, status=status.HTTP_400_BAD_REQUEST)
 
-# class FeedPageView(generics.ListAPIView):
-#     serializer_class = EducationSerializer
-#     ordering_fields = ['likes_count', 'created_at']
+class FeedPageView(generics.ListAPIView):
+    serializer_class = BlogListSerializer
+    ordering_fields = ['likes_count', 'created_at']
 
-#     def get_queryset(self):
-#         try:
-#             user = self.request.user.user_profile
-#             enrollers = user.enrollers.all()
-#             return Education.objects.filter(trainer__in = enrollers)
-#         except Education.DoesNotExist:
-#             return None
+    def get_queryset(self):
+        try:
+            member = Member.objects.get(
+                user_profile__username = self.kwargs['member_username'])
+            mcr = MCR.objects.get(member=member)
+            club = Club.objects.get(id=mcr.club.id)
+            tcrs = TCR.objects.filter(club=club)
+            for tcr in tcrs:
+                trainer = Trainer.objects.get(
+                    user_profile__username=tcr.trainer.user_profile.username)
+                blogs =Blog.objects.filter(
+                            trainer=trainer
+                        ) 
+                return blogs
+        except Blog.DoesNotExist:
+            return None
 
-class EducationSearchView(generics.ListAPIView):
-    serializer_class = EducationSerializer
+class BlogSearchView(generics.ListAPIView):
+    serializer_class = BlogSerializer
 
     def get_queryset(self):
         text = self.kwargs['text']
 
         try:
-            return Education.objects.filter(text__icontains = text)
-        except Education.DoesNotExist:
+            return Blog.objects.filter(text__icontains = text)
+        except Blog.DoesNotExist:
             return None

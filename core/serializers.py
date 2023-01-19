@@ -586,14 +586,12 @@ class MPRListSerializer(serializers.ModelSerializer):
 
 # Bounus Part
 
-class EducationSerializer(serializers.ModelSerializer):
-    # is_liked = serializers.SerializerMethodField()
+class BlogSerializer(serializers.ModelSerializer):
     trainer_data = serializers.SerializerMethodField()
     
     class Meta:
-        model = Education
+        model = Blog
         fields = ['id', 'trainer_data','name', 'text', 
-                #   'image', 'created_at']
                   'image', 'created_at', 'likes_count']
     def get_trainer_data(self, instance):
         _user_profile = instance.trainer.user_profile
@@ -601,18 +599,28 @@ class EducationSerializer(serializers.ModelSerializer):
         _trainer_data['first_name'] = _user_profile.first_name
         _trainer_data['last_name'] = _user_profile.last_name
         return _trainer_data
-    
-    # def get_is_liked(self,instance):
-    #     request = self.context.get('request',None)
-    #     _user_profile = request.user.user_profile
-    #     return instance.is_liked(_user_profile)
 
-class CreateEducationSerializer(serializers.Serializer):
+class CreateBlogSerializer(serializers.Serializer):
     trainer_username = serializers.CharField(max_length=32)
     name = serializers.CharField(max_length=32)
     text = serializers.CharField(max_length=500)
     image = serializers.ImageField(allow_null=True)
 
-# Education-Member Relation
-class EdMRSerializer(serializers.Serializer):
+# Blog-Member Relation
+class BMRSerializer(serializers.Serializer):
     member_username = serializers.CharField(max_length=32)
+
+class BlogListSerializer(serializers.ModelSerializer):
+    trainer_data = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Blog
+        fields = ['id', 'trainer_data', 'name', 'text', 
+                  'image', 'created_at', 'likes_count']
+        
+    def get_trainer_data(self, instance):
+        _user_profile = instance.trainer.user_profile
+        _trainer_data = {}
+        _trainer_data['first_name'] = _user_profile.first_name
+        _trainer_data['last_name'] = _user_profile.last_name
+        return _trainer_data
