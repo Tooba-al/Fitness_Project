@@ -980,3 +980,13 @@ class BlogSearchView(generics.ListAPIView):
             return Blog.objects.filter(text__icontains = text)
         except Blog.DoesNotExist:
             return None
+        
+class CouponListView(generics.ListAPIView):
+    queryset = Coupon.objects.all()
+    serializer_class = CouponSerializer
+    
+class CreateCouponView(generics.GenericAPIView):
+    pass
+
+class EnterCouponView(generics.RetrieveAPIView):
+    pass

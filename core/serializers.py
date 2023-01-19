@@ -624,3 +624,24 @@ class BlogListSerializer(serializers.ModelSerializer):
         _trainer_data['first_name'] = _user_profile.first_name
         _trainer_data['last_name'] = _user_profile.last_name
         return _trainer_data
+
+
+class CouponSerializer(serializers.ModelSerializer):
+    member_data = serializers.SerializerMethodField()
+    club_data = serializers.SerializerMethodField()
+    class Meta:
+        model = Coupon
+        fields = ['id', 'member_data', 'club_data']
+        
+    def get_member_data(self, instance):
+        _user_profile = instance.member.user_profile
+        _member_data = {}
+        _member_data['first_name'] = _user_profile.first_name
+        _member_data['last_name'] = _user_profile.last_name
+        return _member_data
+        
+    def get_club_data(self, instance):
+        _club = instance.club
+        _club_data = {}
+        _club_data['name'] = _club.name
+        return _club_data

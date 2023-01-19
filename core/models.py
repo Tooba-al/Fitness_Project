@@ -138,10 +138,7 @@ class ForgetPasswordLinkObjectManager(models.Manager):
                 return {'status': 201, 'obj': obj, 'link': obj.link}
             return {'status': 201, 'obj': obj}
 
-        return {'status': 403,
-                # 'wait': timezone.timedelta(minutes=UserProfileEmailVerification.RETRY_TIME) +
-                #         (user_profile_email.created_at - timezone.now())
-                }
+        return {'status': 403,}
 
 class ForgetPasswordLink(models.Model):
     RETRY_TIME = 2
@@ -197,7 +194,6 @@ class Trainer(models.Model):
 
 class Owner(models.Model):
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name="owner")
-    # club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="club")
     def __str__(self):
         return self.user_profile.username
 
@@ -206,13 +202,9 @@ class Club(models.Model):
     name = models.CharField(max_length=32)
     address = models.TextField(max_length=500)
     enrollers = models.ManyToManyField(UserProfile, related_name="enrollings", blank=True)
-    # phone_number = models.CharField(max_length=12)
-    # def __str__(self):
-    #     return (self.owner.user_profile.username + " -> " + self.name)
 
 class Event(models.Model):
     owner = models.ForeignKey(Owner, on_delete=models.CASCADE, related_name="send_event_owner")
-    # member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="receiver_event_owner")
     title = models.CharField(max_length=50)
     description = models.TextField(max_length=300)
     date = models.DateField(null = True, blank = True)
@@ -322,7 +314,7 @@ class DMR(models.Model):
 # Bounus Part
 
 class Blog(models.Model):
-    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="Blogs", default = None)
+    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name="blogs", default = None)
     name = models.CharField(max_length=100, null=True)
     text = models.TextField(blank=True, null=True)
     image = models.ImageField(blank=True, null=True)
@@ -349,3 +341,13 @@ class BMR(models.Model):
     def __str__(self):
         return (self.member.user_profile.username + "->" + 
                 self.blog.name)
+        
+        
+class Coupon(models.Model):
+    percentage = models.IntegerField(default=0)
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name="coupon_member")
+    club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="coupon_club")
+    
+    def __str__(self):
+        return (str(self.id) + str(self.percentage))
+    
