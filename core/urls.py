@@ -26,7 +26,7 @@ urlpatterns = [
     path('change-password/', ChangePasswordView.as_view()),
     path('resend-code/', ResendVerificationCodeView.as_view()),
     # path('verify-email/', UserProfileAuthTokenView.as_view()),
-    path('profile/data/', RetrieveUserProfileDataView.as_view()),
+    path('profile/data/<str:token_id>/', RetrieveUserProfileDataView.as_view()),
     path('profile/edit/', RetrieveUserProfileEditView.as_view()),
     path('profile/add-to-wallet/', AddToWalletView.as_view()),
     
@@ -77,7 +77,6 @@ urlpatterns = [
     path('blog/feed/<str:member_username>/', FeedPageView.as_view()),
     path('blog/show/<int:blog_id>/', BlogView.as_view()),
     
-    path('coupon/create/<club_id>/', CreateCouponView.as_view()),
     path('coupon/list/', CouponListView.as_view()),
     path('coupon/show/<int:coupon_id>/', ShowCouponView.as_view()),
     path('coupon/enter/<int:coupon_id>/', EnterCouponView.as_view()),

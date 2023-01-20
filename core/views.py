@@ -40,22 +40,28 @@ class UserSignUpView(generics.GenericAPIView):
                 valid = s.validated_data
                 # hash = make_password(valid.get("password"))
                 hash = make_password(valid.get("password"))
+                user=User.objects.create(username=s.validated_data.get('username'))
+                token, created = Token.objects.get_or_create(user=user)
+                token.save()
                 user_profile = UserProfile.objects.create(username = valid.get('username'),
                                                         password = valid.get('username'),
                                                         email = valid.get('email'),
                                                         first_name = valid.get('first_name'),
                                                         last_name = valid.get('last_name'),                                                
-                                                        user=User.objects.create(
-                                                            username=s.validated_data.get('username')))
+                                                        user=user,)
                 user_profile.save()
+                utr = UTR.objects.create(user_profile=user_profile,
+                                         token=str(token))
+                utr.save()
                 member = Member.objects.create(user_profile = user_profile,
                                                 sex = 0,
                                                 height = 165,
                                                 weight = 60,
                                                 wallet = 0)
-                member.save()
-
-                return Response({'detail': _("wellcome :)")})
+                member.save()   
+                data = UserProfileDataSerializer(instance = user_profile).data
+                
+                return Response({'detail': _("wellcome :)"), 'data': data, 'token': token.key})
 
             # except:
                 # return Response({'detail': _("Problem with signing up")}, status=status.HTTP_400_BAD_REQUEST)
@@ -90,13 +96,16 @@ class OwnerSignUpView(generics.GenericAPIView):
             with transaction.atomic():
                 valid = s.validated_data
                 hash = make_password(valid.get("password"))
+                user=User.objects.create(username=s.validated_data.get('username'))
+                token, created = Token.objects.get_or_create(user=user)
+                token.save()
                 user_profile = UserProfile.objects.create(username = valid.get('username'),
                                                         password = valid.get('username'),
                                                         email = valid.get('email'),
                                                         first_name = valid.get('first_name'),
                                                         last_name = valid.get('last_name'),                                                
-                                                        user=User.objects.create(
-                                                        username=s.validated_data.get('username')))
+                                                        user=user,
+                                                        token=token)
                 user_profile.save()
                 owner = Owner.objects.create(
                     user_profile = user_profile,
@@ -116,8 +125,9 @@ class OwnerSignUpView(generics.GenericAPIView):
 
                 # if settings.DEBUG:
                 #     return Response({'detail': _("Code sent"), 'code': upv['code']})
-
-                return Response({'detail': _("wellcome!")})
+                data = UserProfileDataSerializer(instance = user_profile).data
+                
+                return Response({'detail': _("wellcome :)"), 'data': data, 'token': token.key})
 
             # except:
             #     return Response({'detail': _("Problem with signing up")}, status=status.HTTP_400_BAD_REQUEST)
@@ -152,7 +162,12 @@ class RetrieveUserProfileDataView(generics.RetrieveAPIView):
 
     def get_object(self):
         try:
-            return self.request.user
+            utr = UTR.objects.get(
+                    token=self.kwargs['token_id']
+                )
+            return UserProfile.objects.get(
+                user=utr.user_profile.user
+            )
         except UserProfile.DoesNotExist:
             return None
 
@@ -161,10 +176,6 @@ class RetrieveUserProfileEditView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         try:
-            # username = self.kwargs['username']
-            # username = self.request.data.get('username')
-            # user_profile = UserProfile.objects.get(username = username)
-            # return UserProfileDataSerializer(instance = user_profile).data
             return (self.request.user)
         except UserProfile.DoesNotExist:
             return None
@@ -173,7 +184,6 @@ class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
 
     def post(self, request, *args, **kwargs):
-
         username = request.data.get('username')
         password = request.data.get('password')
         # password = make_password(request.data.get('password'))
@@ -186,12 +196,12 @@ class LoginView(generics.GenericAPIView):
         if not user_profile:
             return Response({'detail': _('Username not found')}, status=status.HTTP_404_NOT_FOUND)
 
-        print(password)
-        print(user_profile.password)
         if(password == user_profile.password):
             token = Token.objects.get_or_create(user=user_profile.user)[0]
+            token.save()
             data = UserProfileDataSerializer(instance = user_profile).data
-            return Response({'data': data, 'token': token.key})
+            return Response({'detail': _("Wellcome Back :)"), 'data': data, 'token': token.key})
+
         else:
             return Response({'detail': _('Wrong password'),}, status=status.HTTP_404_NOT_FOUND)
 

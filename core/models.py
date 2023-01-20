@@ -34,13 +34,14 @@ class UserProfile(models.Model):
     first_name = models.CharField(max_length=100, blank=True, null=True)
     last_name = models.CharField(max_length=100, blank=True, null=True)
     email = models.CharField(max_length =255, unique=True)
+    # token = models.CharField(max_length =255, unique=True)
     
     # created_at = models.DateTimeField(auto_now_add=True)
     objects = UserProfileManager()
-    @property
-    def token(self):
-        token, created = Token.objects.get_or_create(user=self.user)
-        return token.key
+    # @property
+    # def token(self):
+    #     token, created = Token.objects.get_or_create(user=self.user)
+    #     return token.key
     
     def __str__(self):
         return self.username
@@ -108,6 +109,12 @@ class UserProfile(models.Model):
 #     if created:
 #         # send_verification_code(instance.user_profile.email, instance.code)
 #         send_code_email(instance.user_profile.first_name, instance.user_profile.email, instance.code)
+  
+  
+# UserProfile-Token Relation
+class UTR(models.Model):
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="UTR_user")
+    token = models.CharField(max_length=500, unique=True)
        
 class ForgetPasswordLinkObjectManager(models.Manager):
     def create(self, **kwargs):

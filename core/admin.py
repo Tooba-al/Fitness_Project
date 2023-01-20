@@ -11,6 +11,7 @@ admin.site.register(Club)
 admin.site.register(Event)
 admin.site.register(TargetCategory)
 admin.site.register(Target)
+admin.site.register(UTR)        # UserProfile-Token Relation
 admin.site.register(TCR)        # Trainer-Club Relation
 admin.site.register(MCR)        # Member-Club Relation
 admin.site.register(EMR)        # Event-Members Relation

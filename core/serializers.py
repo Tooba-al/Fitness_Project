@@ -114,7 +114,7 @@ class ForgetPasswordSerializer(serializers.Serializer):
 class UserProfileIdSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ['id', 'username']
+        fields = ['id', 'username', 'token']
    
 ##################################
 ##################################
