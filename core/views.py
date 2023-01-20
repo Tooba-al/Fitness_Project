@@ -47,12 +47,13 @@ class UserSignUpView(generics.GenericAPIView):
                                                         password = valid.get('username'),
                                                         email = valid.get('email'),
                                                         first_name = valid.get('first_name'),
-                                                        last_name = valid.get('last_name'),                                                
+                                                        last_name = valid.get('last_name'),
+                                                        token=token,                                              
                                                         user=user,)
                 user_profile.save()
-                utr = UTR.objects.create(user_profile=user_profile,
-                                         token=str(token))
-                utr.save()
+                # utr = UTR.objects.create(user_profile=user_profile,
+                #                          token=str(token))
+                # utr.save()
                 member = Member.objects.create(user_profile = user_profile,
                                                 sex = 0,
                                                 height = 165,
@@ -162,12 +163,8 @@ class RetrieveUserProfileDataView(generics.RetrieveAPIView):
 
     def get_object(self):
         try:
-            utr = UTR.objects.get(
-                    token=self.kwargs['token_id']
-                )
             return UserProfile.objects.get(
-                user=utr.user_profile.user
-            )
+                token=self.kwargs['token_id'])
         except UserProfile.DoesNotExist:
             return None
 

@@ -34,7 +34,7 @@ class UserProfile(models.Model):
     first_name = models.CharField(max_length=100, blank=True, null=True)
     last_name = models.CharField(max_length=100, blank=True, null=True)
     email = models.CharField(max_length =255, unique=True)
-    # token = models.CharField(max_length =255, unique=True)
+    token = models.ForeignKey(Token, on_delete=models.CASCADE, related_name="user_token")
     
     # created_at = models.DateTimeField(auto_now_add=True)
     objects = UserProfileManager()
