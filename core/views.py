@@ -9,6 +9,7 @@ from .models import *
 import ast
 import os
 import datetime
+from .permissions import *
 
 
 class UserSignUpView(generics.GenericAPIView):
@@ -143,6 +144,7 @@ class UserProfileAuthTokenView(generics.CreateAPIView):
     """
 
     serializer_class = UserProfileDataSerializer
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
 
@@ -160,20 +162,25 @@ class UserProfileAuthTokenView(generics.CreateAPIView):
 
 class RetrieveUserProfileDataView(generics.RetrieveAPIView):
     serializer_class = UserProfileDataSerializer
+    # permission_classes = (IsAuthenticated,)
 
     def get_object(self):
         try:
-            return UserProfile.objects.get(
-                token=self.kwargs['token_id'])
+            print("#####################")
+            # print(self.request.META.keys())
+            print(self.request.auth)
+            print("#####################")
+            return self.request.user
         except UserProfile.DoesNotExist:
             return None
 
 class RetrieveUserProfileEditView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileDataEditSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_object(self):
         try:
-            return (self.request.user)
+            return self.request.user
         except UserProfile.DoesNotExist:
             return None
 
