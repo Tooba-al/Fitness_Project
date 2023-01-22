@@ -166,11 +166,8 @@ class RetrieveUserProfileDataView(generics.RetrieveAPIView):
 
     def get_object(self):
         try:
-            print("#####################")
-            # print(self.request.META.keys())
-            print(self.request.auth)
-            print("#####################")
-            return self.request.user
+            # return self.request.user
+            return UserProfile.objects.get(token = str(self.request.auth)).user
         except UserProfile.DoesNotExist:
             return None
 
