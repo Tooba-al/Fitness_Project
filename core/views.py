@@ -167,7 +167,7 @@ class RetrieveUserProfileDataView(generics.RetrieveAPIView):
     def get_object(self):
         try:
             # return self.request.user
-            return UserProfile.objects.get(token = str(self.request.auth)).user
+            return UserProfile.objects.get(token = str(self.request.auth)).user_profile
         except UserProfile.DoesNotExist:
             return None
 
