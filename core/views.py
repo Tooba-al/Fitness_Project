@@ -610,13 +610,18 @@ class AddTrainerView(generics.GenericAPIView):
             return Response({'detail': _('Username not found')}, status=status.HTTP_404_NOT_FOUND)
         
         elif owner != None:
+            user = User.objects.create(username=valid.get('trainer_username'))
+            user.save()
+            token, created = Token.objects.get_or_create(user=user)
+            token.save()
             user_profile = UserProfile.objects.create(
                 username = valid.get('trainer_username'),
                 password = valid.get('trainer_password'),
                 first_name = valid.get('first_name'),
                 last_name = valid.get('last_name'),
                 email = valid.get('email'),
-                user = User.objects.create(username=valid.get('trainer_username'))
+                user = user,
+                token = token
             )
             user_profile.save()
             
@@ -845,7 +850,7 @@ class EnrollToDietView(generics.GenericAPIView):
     
     def get_object(self):
         try:
-            diet = diet.objects.get(name = self.request.data.get('diet_name'))
+            diet = Diet.objects.get(name = self.request.data.get('diet_name'))
             return diet
         except:
             return None
@@ -931,9 +936,9 @@ class BlogLikeView(generics.UpdateAPIView):
 
         try:
             member = Member.objects.get(user_profile__username = valid.get('member_username'))
-            Blog =  Blog.objects.get(id = self.kwargs['blog_id'])
+            blog =  Blog.objects.get(id = self.kwargs['blog_id'])
             emr = BMR.objects.get_or_create(
-                Blog = Blog,
+                blog = blog,
                 member = member,
             )
             emr[0].isLiked = True
@@ -952,9 +957,9 @@ class BlogDislikeView(generics.CreateAPIView):
 
         try:
             member = Member.objects.get(user_profile__username = valid.get('member_username'))
-            Blog =  Blog.objects.get(id = self.kwargs['blog_id'])
+            blog =  Blog.objects.get(id = self.kwargs['blog_id'])
             emr = BMR.objects.get(
-                Blog = Blog,
+                blog = blog,
                 member = member,
             )
             emr.isLiked = False
